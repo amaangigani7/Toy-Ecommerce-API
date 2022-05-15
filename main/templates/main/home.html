@@ -1,0 +1,15 @@
+{% extends "main/base.html" %}
+{% block content %}
+  <h1>Home</h1>
+  <p>msg: {{ msg }}</p>
+  {% if user.is_authenticated %}
+    <p>{{ user.email }}</p>
+    <p>{{ user.user_name }}</p>
+    <p>{{ user.first_name }}</p>
+    {% if user.is_superuser %}
+      <p>Super User</p>
+    {% endif %}
+  {% else %}
+    <p>you are not logged in</p>
+  {% endif %}
+{% endblock %}

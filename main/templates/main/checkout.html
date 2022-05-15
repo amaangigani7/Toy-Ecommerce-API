@@ -1,0 +1,58 @@
+{% extends "main/base.html" %}
+{% block content %}
+<h1>Check Out</h1>
+{% if product %}
+  <p>{{ product.name }}</p>
+  <p>{{ product.sale_price }}</p>
+{% elif order_items %}
+  <p>Total: {{ total }}</p>
+  {% for item in order_items %}
+    <p>{{ item.product.name }}</p>
+    <p>{{ item.product.sale_price }} - Quantity: {{ item.quantity }}</p>
+    <!-- <p>{{ item.product.product_price }}</p> -->
+  {% endfor %}
+{% endif %}
+  <form id="form" method="post" action="{% url 'main:process_order' total=total %}">
+    {% csrf_token %}
+    {% if user.is_authenticated %}
+      <p>name and email saved as you are logged in</p>
+    {% endif %}
+  <hr>
+  <div id="shipping-info">
+    <hr>
+    <p>Shipping Information:</p>
+    <hr>
+    <div class="form-field">
+      <input class="form-control" type="text" name="address" placeholder="Address..">
+    </div>
+    <div class="form-field">
+      <input class="form-control" type="text" name="city" placeholder="City..">
+    </div>
+    <div class="form-field">
+      <input class="form-control" type="text" name="state" placeholder="State..">
+    </div>
+    <div class="form-field">
+      <input class="form-control" type="text" name="zipcode" placeholder="Zip code..">
+    </div>
+  </div>
+  <hr>
+  <input id="form-button" class="btn btn-success btn-block" type="submit" value="Pay Now">
+  <form action="https://www.example.com/payment/success/" method="POST">
+  <script
+    src="https://checkout.razorpay.com/v1/checkout.js"
+    data-key="rzp_test_5Eo5eGr8zKCjKA"
+    data-amount="{{ total_p }}"
+    data-currency="INR"
+    data-order_id="{{ order.transaction_id }}"
+    data-buttontext="Pay with Razorpay"
+    data-name="Toy Ecommerce"
+    data-description="Django used for payments with Razorpay"
+    data-image="https://example.com/your_logo.jpg"
+    data-prefill.name="PC"
+    data-prefill.email="name"
+    data-theme.color="#F37254"
+  ></script>
+  <input type="hidden" custom="Hidden Element" name="hidden">
+  </form>
+</form>
+{% endblock %}

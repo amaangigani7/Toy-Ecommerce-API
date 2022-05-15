@@ -1,0 +1,27 @@
+{% extends "main/base.html" %}
+{% block content %}
+  <h1>Your Account</h1>
+  <p>Hi, {{ customer }}</p>
+  <h2>Your Cart contains:</h2>
+  {% if cart_items %}
+    <a href="{% url 'main:cart_checkout' %}">Checkout!</a>
+    {% for item in cart_items %}
+      <p>{{ item.product.name }} - {{ item.quantity }}</p>
+    {% endfor %}
+  {% else %}
+    <p>Nothing in your cart!</p>
+  {% endif %}
+  {% if orders %}
+    <h2>Your Orders:</h2>
+    {% for order in orders %}
+      <hr>
+      <p>Date: {{ order.date_ordered }} Total: {{ order.get_order_total }}</p>
+      <p>Completed: {{ order.complete }}</p>
+      <p>Transaction ID: {{ order.transaction_id }}</p>
+      <p>Shipping Address: {{ order.get_shipping_address }} </p>
+      {% for i in get_shipping_address %}
+      <p>{{ i.city }}</p>
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+{% endblock %}

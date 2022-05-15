@@ -1,0 +1,17 @@
+{% extends "main/base.html" %}
+{% block content %}
+<h1>Products</h1>
+{% for product in products %}
+  <a href="{% url 'main:product_detail' slug=product.slug %}">view</a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'main:add_to_cart' slug=product.slug %}">Add to Cart</a>
+  {% endif %}
+  <p>{{product.name}}</p>
+  <p>{{product.sale_price}}</p>
+  <p>{{product.product_price}}</p>
+  <p>{{product.description}}</p>
+  <p>{{product.short_description}} </p>
+  <p>{{product.meta_description}}</p>
+  <hr>
+{% endfor %}
+{% endblock %}

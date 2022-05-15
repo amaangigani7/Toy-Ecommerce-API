@@ -1,0 +1,16 @@
+{% extends "main/base.html" %}
+{% block content %}
+<h1>Product Detail</h1>
+{% if user.is_authenticated %}
+  <a href="{% url 'main:add_to_cart' slug=product.slug %}">Add to Cart</a>
+{% endif %}
+<p>{{product.name}}</p>
+{% for i in images %}
+  <img src="{{i.image.url}}" height='100px' width='100px' alt="image of product"/>
+{% endfor %}
+<p>{{product.sale_price}}</p>
+<p>{{product.product_price}}</p>
+<p>{{product.description}}</p>
+<p>{{product.short_description}} </p>
+<p>{{product.meta_description}}</p>
+{% endblock %}

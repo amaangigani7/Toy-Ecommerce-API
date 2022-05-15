@@ -1,0 +1,169 @@
+from rest_framework import serializers
+from rest_framework.response import Response
+from .models import *
+import uuid
+
+class CustomerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+class BlogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Blog
+        fields = '__all__'
+
+class ContactUsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ContactUs
+        fields = '__all__'
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer()
+
+    class Meta:
+        model = ProductReview
+        fields = ('customer', 'review', 'rating')
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    # product = ProductSerializer()
+
+    class Meta:
+        model = ProductImage
+        fields = (
+            'id', 'image_url',
+        )
+
+class ProductSerializer(serializers.ModelSerializer):
+    get_image_url = ProductImageSerializer(many=True)
+    get_reviews = ProductReviewSerializer(many=True)
+    get_product_rating = serializers.FloatField()
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+
+class GiftImageSerializer(serializers.ModelSerializer):
+    # product = ProductSerializer()
+
+    class Meta:
+        model = GiftImage
+        fields = '__all__'
+
+
+class GiftSerializer(serializers.ModelSerializer):
+    get_image_url = GiftImageSerializer(many=True)
+
+    class Meta:
+        model = Gift
+        fields = '__all__'
+
+
+
+
+# class ProductImageSerializer(serializers.ModelSerializer):
+#     product = ProductSerializer()
+#
+#     class Meta:
+#         model = ProductImage
+#         fields = (
+#             'id', 'product', 'image', 'image_url',
+#         )
+
+# class AccountCartSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = CartItem
+#         fields = '__all__'
+
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    customer = CustomerSerializer()
+
+    class Meta:
+        model = CartItem
+        fields = ('id', 'customer', 'product', 'quantity')
+
+class WishListSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    customer = CustomerSerializer()
+
+    class Meta:
+        model = WishList
+        fields = ('id', 'customer', 'product')
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    # product = ProductSerializer()
+    # order = OrderSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
+
+
+class ShippingAddressSerializer(serializers.ModelSerializer):
+    # customer = CustomerSerializer()
+
+    class Meta:
+        model = ShippingAddress
+        fields = ('id', 'address', 'city', 'state', 'date_added')
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer()
+    get_order_items = OrderItemSerializer(many=True)
+    shipping_address = ShippingAddressSerializer()
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+
+
+
+
+# Register Serializer
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=100, min_length=6)
+    user_name = serializers.CharField(max_length=100)
+    password = serializers.CharField(max_length=100)
+
+    # class Meta:
+    #     model = User
+    #     fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password')
+    #
+    # def validate(self, args):
+    #     email = args.get('email', None)
+    #     username = args.get('username', None)
+    #     if User.objects.filter(email=email).exists():
+    #         raise serializers.ValidationError({'email': ('email already exists')})
+    #     if User.objects.filter(username=username).exists():
+    #         raise serializers.ValidationError({'username': ('username already exists')})
+    #     return super().validate(args)
+    #
+    # def create(self, validated_data):
+    #     return User.objects.create_user(**validated_data)
+    #
+    class Meta:
+        model = Customer
+        fields = ('id', 'user_name', 'email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        print('validated_data= ', validated_data)
+        while True:
+            auth_token = str(uuid.uuid4())
+            if not Customer.objects.filter(verification_token=auth_token).first():
+                break
+        customer = Customer.objects.create(user_name=validated_data['user_name'], email=validated_data['email'], verification_token=auth_token)
+        customer.set_password(validated_data['password'])
+        print("password", customer.password)
+        customer.save()
+        return customer
