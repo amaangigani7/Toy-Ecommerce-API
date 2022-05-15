@@ -17,8 +17,8 @@ from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from knox.views import LoginView as KnoxLoginView
-from knox.models import AuthToken
+# from knox.views import LoginView as KnoxLoginView
+# from knox.models import AuthToken
 from django.db.models import Q
 from .models import *
 from .utils import *
