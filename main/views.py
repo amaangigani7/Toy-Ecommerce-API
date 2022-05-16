@@ -390,6 +390,10 @@ class RegisterAPI(generics.GenericAPIView):
         print(request.data['user_name'])
         if '.' in request.data['user_name']:
             return Response({"message": 'Username cannot have a "."'})
+        if Customer.objects.filter(user_name=request.data['user_name']):
+            return Response({"message": 'Username taken!'})
+        if Customer.objects.filter(user_name=request.data['email']):
+            return Response({"message": 'Email already registered! Try logging in!'})
         serializer = self.get_serializer(data=request.data)
         # serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
@@ -399,7 +403,7 @@ class RegisterAPI(generics.GenericAPIView):
             send_email_after_registration(request.data['email'], token=Customer.objects.get(user_name=request.data['user_name']).verification_token)
             return Response({
             "user": CustomerSerializer(customer, context=self.get_serializer_context()).data,
-            "token": AuthToken.objects.create(customer)[1],
+            # "token": AuthToken.objects.create(customer)[1],
             "message": 'An Email has been sent to your email ID if it was valid.'
             })
         return Response({"Errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
