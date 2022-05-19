@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.template.defaultfilters import slugify
 import random
@@ -35,7 +36,8 @@ class Customer(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(gettext_lazy('email_address'), unique=True)
     user_name = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150, blank=True, null=True)
-    start_date = models.DateTimeField(default=timezone.now)
+    last_name = models.CharField(max_length=150, blank=True, null=True)
+    # start_date = models.DateTimeField(default=timezone.now)
     about = models.TextField(gettext_lazy('about'), max_length=500, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
@@ -120,11 +122,6 @@ class Product(models.Model):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     image = models.FileField(null=True, blank=True)
-
-    # def get_image(self):
-    #     if self.image:
-    #         return 'http://127.0.0.1:8000' + self.image.url
-    #     return ''
 
     @property
     def image_url(self):
@@ -219,21 +216,21 @@ class WishList(models.Model):
 
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, null=True, blank=True, on_delete=models.SET_NULL)
-    # order = models.ForeignKey(Order, null=True, blank=True, on_delete=models.SET_NULL)
-    first_name = models.CharField(null=True, blank=True, max_length=100)
-    last_name = models.CharField(null=True, blank=True, max_length=100)
+    first_name = models.CharField(null=True, max_length=100)
+    last_name = models.CharField(null=True, max_length=100)
     address_1 = models.CharField(null=True, max_length=255)
     address_2 = models.CharField(null=True, blank=True, max_length=255)
-    city = models.CharField(null=True, blank=True, max_length=255)
-    state = models.CharField(null=True, blank=True, max_length=10)
-    zipcode = models.CharField(null=True, blank=True, max_length=100)
-    country = models.CharField(null=True, blank=True, max_length=50)
-    phone_number = PhoneNumberField(null=True, blank=True)
+    city = models.CharField(null=True, max_length=255)
+    state = models.CharField(null=True, max_length=10)
+    zipcode = models.CharField(null=True, max_length=100)
+    country = models.CharField(null=True, max_length=50)
+    phone_number = PhoneNumberField(null=True, )
     date_added = models.DateTimeField(auto_now_add=True)
-    default_add = models.BooleanField(null=True, blank=True)
+    default_add = models.BooleanField(null=True, blank=True, default=False)
 
     class Meta:
-        unique_together = [['customer', 'address_1', 'address_1', 'city', 'state', 'zipcode']]
+        unique_together = ('customer', 'first_name', 'last_name', 'address_1', 'address_1', 'city', 'state', 'zipcode', 'country', 'phone_number')
+
 
     def __str__(self):
         if self.address_1 is None:
@@ -250,6 +247,7 @@ class Order(models.Model):
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(null=True, blank=True, max_length=255)
     delivered = models.BooleanField(default=False, choices=delivered_choices)
+    shipping_method = models.CharField(null=True, blank=True, max_length=255)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
@@ -268,29 +266,11 @@ class Order(models.Model):
         order_items = self.orderitem_set.all()
         return order_items
 
-    # @property
-    # def get_shipping_address(self):
-    #     shipping_address = self.shippingaddress_set.all()
-    #     print("shipping address= ", shipping_address)
-    #     return shipping_address
-        # try:
-        #     s = ShippingAddress.objects.get(order=self.id)
-        #     return s.address + ', ' + s.city + ', ' + s.state + ', ' + s.zipcode
-        # except:
-        #     return 'Some error occured while fetching this.'
-
-    # @property
-    # def get_cart_items(self):
-    #     order_items = self.orderitem_set.all()
-    #     total = sum([item.quantity for item in order_items])
-    #     return total
-
     def __str__(self):
         if self.complete == True:
             return str(self.transaction_id)
         else:
             return str(self.id)
-
 
 
 class OrderItem(models.Model):
@@ -306,5 +286,18 @@ class OrderItem(models.Model):
     def get_total(self):
         return self.product.sale_price * self.quantity
 
+    def change_address(self, new_add):
+        return new_add
+
     def __str__(self):
         return self.product.name
+
+class Coupon(models.Model):
+    name = models.CharField(max_length=10)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    discount = models.IntegerField(validators=[MinValueValidator(1),
+                                       MaxValueValidator(100)])
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name

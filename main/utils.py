@@ -6,6 +6,41 @@ from main.models import *
 import pandas as pd
 import os
 
+def get_create_address(address, user, parameter="both"):
+    if parameter == 'both':
+        new_add, created = ShippingAddress.objects.get_or_create(
+            customer = user,
+            first_name = address['first_name'],
+            last_name = address['last_name'],
+            address_1 = address['address_1'],
+            address_2 = address['address_2'],
+            city = address['city'],
+            state = address['state'],
+            zipcode = address['zipcode'],
+            country = address['country'],
+            phone_number = address['phone_number']
+        )
+        return new_add, created
+    elif parameter == 'get':
+        try:
+            print('entered elif')
+            new_add = ShippingAddress.objects.filter(
+                customer = user,
+                first_name = address['first_name'],
+                last_name = address['last_name'],
+                address_1 = address['address_1'],
+                address_2 = address['address_2'],
+                city = address['city'],
+                state = address['state'],
+                zipcode = address['zipcode'],
+                country = address['country'],
+                phone_number = address['phone_number']
+            ).first()
+        except:
+            new_add = None
+        return new_add
+
+
 def send_email_after_registration(email, token):
     subject = 'Your email needs to be verified'
     message = 'Hi paste the link to verify your account http://127.0.0.1:8000/main/verify/{}'.format(token)
@@ -26,6 +61,16 @@ def send_email_after_purchase(order):
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [order.customer.email,]
     send_mail(subject, message, email_from, recipient_list)
+
+def check_coupon(coupon, user):
+    dis = 0
+    c = Coupon.objects.filter(is_active=True)
+    for i in c:
+        if i.name == coupon and (i.customer == user or i.customer == None):
+            print("you get a discount of {}%".format(i.discount))
+            dis = i.discount
+            break
+    return dis
 
 # order, created = Order.objects.get_or_create(customer__user_name='amaan35', complete=False)
 # order.save()

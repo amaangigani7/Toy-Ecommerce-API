@@ -5,15 +5,6 @@
     <title>home</title>
   </head>
   <body>
-    <a href="{% url 'home' %}">Home</a>
-    <a href="{% url 'main:products' %}">Products</a>
-    <a href="{% url 'main:about' %}">About</a>
-    <a href="{% url 'main:faqs_and_blogs' %}">FAQs and Blogs</a>
-    <a href="{% url 'main:contact_us' %}">Contact Us</a>
-    {% if user.is_authenticated %}
-      <a href="{% url 'main:your_account' %}">Your Account</a>
-    {% else %}
-    {% endif %}
 
     <div class="content container">
           <div class="row">

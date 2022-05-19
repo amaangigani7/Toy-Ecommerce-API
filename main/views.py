@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from rest_framework import status, authentication, permissions, generics
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -17,8 +19,6 @@ from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-# from knox.views import LoginView as KnoxLoginView
-# from knox.models import AuthToken
 from django.db.models import Q
 from .models import *
 from .utils import *
@@ -121,16 +121,16 @@ def product_review_edit(request, slug):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def account_edit(request):
-    # product = Product.objects.get(slug=slug)
-    # text = request.data.get('review')
-    # rating = request.data.get('rating')
-    # pr = ProductReview.objects.get(customer=request.user, product=product)
-    # pr.review = text
-    # pr.rating = rating
-    # pr.edited_on = timezone.now()
-    # pr.save()
-    msg = "Review Edited."
-    return Response({"msg": msg})
+    customer = Customer.objects.get(user_name=request.user)
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
+    about = request.data.get('about')
+    customer.first_name = first_name
+    customer.last_name = last_name
+    customer.about = about
+    customer.save()
+    msg = "Account details edited."
+    return Response({"msg": msg, 'new_data': CustomerSerializer(customer).data})
 
 # @login_required
 @api_view(['POST'])
@@ -138,73 +138,165 @@ def account_edit(request):
 def cart_checkout(request):
     order, created = Order.objects.get_or_create(customer=request.user, complete=False)
     order.save()
-    total = 0
-    for i in CartItem.objects.filter(customer=request.user):
-        order_item, created = OrderItem.objects.get_or_create(order=order, product=i.product)
-        cart_quan = CartItem.objects.get(customer=request.user, product=i.product)
-        order_item.quantity = cart_quan.quantity
-        order_item.save()
-    total += order.get_order_total
-    # o_items = OrderItem.objects.filter(order=order)
-    # print(o_items)
-    serializer = OrderSerializer(order)
-    # all_objects = list(order.transaction_id) + list(OrderItem.objects.filter(order=order)) + list(total) + list(int(total) * 100)
-    # data = serializers.serialize('json', all_objects)
-    return Response({"order_details": serializer.data, 'total': total, 'total_paise': int(total*100)})
-    # return render(request, 'main/checkout.html', {'order': order.transaction_id, 'order_items': OrderItem.objects.filter(order=order), 'total': total, 'total_p': int(total) * 100})
+    cart_items = CartItem.objects.filter(customer=request.user)
+    if len(cart_items) > 0:
+        for i in cart_items:
+            order_item, created = OrderItem.objects.get_or_create(order=order, product=i.product)
+            cart_quan = CartItem.objects.get(customer=request.user, product=i.product)
+            order_item.quantity = cart_quan.quantity
+            order_item.save()
+        total = order.get_order_total
+        serializer = OrderSerializer(order)
+        return Response({"order_details": serializer.data, 'total': total, 'total_paise': int(total*100)})
+    else:
+        msg = "The Cart is Empty"
+        return Response({'msg': msg})
 
-# @login_required
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def verify_coupon(request):
+    coupon = request.data.get('coupon')
+    discount = check_coupon(coupon, request.user)
+    if discount == 0:
+        msg = 'Coupon is not valid'
+    else:
+        msg = 'Coupon gave a discount of {}'.format(discount)
+    return Response({'msg': msg})
+
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def process_order(request):
-    first_name = request.data.get('first_name')
-    last_name = request.data.get('last_name')
-    address_1 = request.data.get('address_!')
-    address_2 = request.data.get('address_2')
-    city = request.data.get('city')
-    state = request.data.get('state')
-    zipcode = request.data.get('zipcode')
-    country = request.data.get('country')
-    phone_number = request.data.get('phone_number')
-    transaction_id = datetime.datetime.now().timestamp()
-    order = Order.objects.get(customer=request.user, complete=False)
-
-    # if str(total) == str(order.get_order_total):
-    #     # breakpoint()
     try:
-        shipping_add = ShippingAddress.objects.get(customer=request.user)
+        address = request.data.get('address')
+        # first_name = request.data.get('first_name')
+        # last_name = request.data.get('last_name')
+        # address_1 = request.data.get('address_1')
+        # address_2 = request.data.get('address_2')
+        # city = request.data.get('city')
+        # state = request.data.get('state')
+        # zipcode = request.data.get('zipcode')
+        # country = request.data.get('country')
+        # phone_number = request.data.get('phone_number')
+        shipping_method = request.data.get('shipping_method')
+        order_total = request.data.get('order_total')
+        coupon_code = request.data.get('coupon')
+        print(order_total)
+        dis = check_coupon(coupon_code, request.user)
+        transaction_id = datetime.datetime.now().timestamp()
+        try:
+            order = Order.objects.get(customer=request.user, complete=False)
+            final_bill = order.get_order_total * (100- dis) / 100
+            print(final_bill)
+            if str(order_total) == str(final_bill):
+                shipping_add, created = get_create_address(address, request.user)
+                shipping_add.save()
+                order.shipping_address = shipping_add
+                order.transaction_id = transaction_id
+                client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
+                DATA = {
+                    "amount": int(str(order.get_order_total)[:-3]),
+                    "currency": "INR",
+                    'payment_capture': '1'
+                }
+                payment = client.order.create(data=DATA)
+                print(payment)
+                order.complete = True
+                order.save()
+                msg = 'order placed!'
+                cart_items = CartItem.objects.filter(customer=request.user)
+                for i in cart_items:
+                    i.delete()
+                serializer = OrderSerializer(order)
+                return Response({'msg': msg, 'order_details': serializer.data})
+            else:
+                msg = "There was some error with provided total and actual total"
+                return Response({'msg': msg})
+        except:
+            return Response({'msg': "Order is not created yet."})
+    except ObjectDoesNotExist as e:
+        return Response({'msg': e})
+
+# breakpoint()
+# try:
+#     shipping_add = ShippingAddress.objects.get(customer=request.user)
+# except:
+#     shipping_add = ShippingAddress.objects.create(customer=request.user, order=order)
+#     # shipping_add.save()
+# shipping_add.first_name = first_name
+# shipping_add.last_name = last_name
+# shipping_add.address_1 = address_1
+# shipping_add.address_2 = address_2
+# shipping_add.city = city
+# shipping_add.state = state
+# shipping_add.zipcode = zipcode
+# shipping_add.country = country
+# shipping_add.phone_number = phone_number
+
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def add_address(request):
+    msg = 'adding an address'
+    address = request.data.get('address')
+    curr_add = ShippingAddress.objects.filter(customer=request.user, default_add=True)
+    try:
+        new_add, created = get_create_address(address, request.user)
+        if len(curr_add) == 0:
+            new_add.default_add = True
+            new_add.save()
+        if created == False:
+            msg = "found an address"
+        return Response({'msg': msg, "new_address": ShippingAddressSerializer(new_add).data, 'curr_add': ShippingAddressSerializer(curr_add, many=True).data})
+    except IntegrityError:
+        msg = "same address already exists"
+    return Response({'msg': msg, 'curr_add': ShippingAddressSerializer(curr_add).data})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def delete_address(request):
+    address = request.data.get('address')
+    try:
+        # add = get_create_address(address, request.user, 'get')
+        add = ShippingAddress.objects.get(id=address['id'])
+        if add == None:
+            msg = "given address is not found"
+            return Response({'msg': msg})
+        add.delete()
+        msg = "found and deleted the address"
+        return Response({'msg': msg})
     except:
-        shipping_add = ShippingAddress.objects.create(customer=request.user, order=order)
-        # shipping_add.save()
-    shipping_add.first_name = first_name
-    shipping_add.last_name = last_name
-    shipping_add.address_1 = address_1
-    shipping_add.address_2 = address_2
-    shipping_add.city = city
-    shipping_add.state = state
-    shipping_add.zipcode = zipcode
-    shipping_add.country = country
-    shipping_add.phone_number = phone_number
-    shipping_add.save()
-    order.shipping_address = shipping_add
-    order.transaction_id = transaction_id
-    order.complete = True
-    client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
-    DATA = {
-        "amount": int(str(order.get_order_total)[:-3]),
-        "currency": "INR",
-        'payment_capture': '1'
-    }
-    payment = client.order.create(data=DATA)
-    order.save()
-    # send_email_after_purchase(order)
-    msg = 'order placed!'
-    cart_items = CartItem.objects.filter(customer=request.user)
-    for i in cart_items:
-        i.delete()
-    serializer = OrderSerializer(order)
-    return Response({'msg': msg, 'order_details': serializer.data})
-    # return Response({'msg': msg})
+        return Response({'msg': "something went wrong"})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def change_default_address(request):
+    address = request.data.get('new_address')
+    msg = 'trying...'
+    curr_add = ShippingAddress.objects.filter(customer=request.user, default_add=True)
+    new_add, created = get_create_address(address, request.user)
+    if created == False:
+        msg = 'using old address'
+        if new_add.default_add == True:
+            msg = 'both adds are same'
+        else:
+            msg = 'new address made default'
+    else:
+        msg = 'making new address'
+    new_add.default_add = True
+    new_add.save()
+    if len(curr_add) == 1:
+        curr_add[0].default_add = False
+        curr_add[0].save()
+    # curr_add = ShippingAddress.objects.filter(customer=request.user, default_add=True)
+    # serializer = ShippingAddressSerializer(curr_add, many=True)
+    return Response({'msg': msg, "new_address": ShippingAddressSerializer(new_add).data})
+
 
 
 @api_view(['POST'])
@@ -325,14 +417,14 @@ def your_account(request):
     # return HttpResponse(data)
     # return render(request, 'main/your_account.html', {'customer': request.user, 'cart_items': cart_items, 'orders': orders})
 
-def about(request):
-    return render(request, 'main/about.html')
-
-def faqs(request):
-    return render(request, 'main/faqs_and_blogs.html')
-
-def contact_us(request):
-    return render(request, 'main/contact_us.html')
+# def about(request):
+#     return render(request, 'main/about.html')
+#
+# def faqs(request):
+#     return render(request, 'main/faqs_and_blogs.html')
+#
+# def contact_us(request):
+#     return render(request, 'main/contact_us.html')
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -409,8 +501,8 @@ class RegisterAPI(generics.GenericAPIView):
         return Response({"Errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def success(request):
-    return render(request , 'main/success.html')
+# def success(request):
+#     return render(request , 'main/success.html')
 
 
 # def token_send(request):
@@ -434,10 +526,10 @@ def verify(request, auth_token):
 
 
 
-@login_required
-def user_logout(request):
-    logout(request)
-    return render(request,'main/home.html')
+# @login_required
+# def user_logout(request):
+#     logout(request)
+#     return render(request,'main/home.html')
 
 @api_view(['POST'])
 def change_password(request, token):

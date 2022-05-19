@@ -7,13 +7,14 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = '__all__'
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'about', 'created_at', 'is_active')
+    
 
 class BlogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blog
-        fields = '__all__'
+        fields = ('author', 'title', 'content', 'posted_at')
 
 class ContactUsSerializer(serializers.ModelSerializer):
 
@@ -26,17 +27,13 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductReview
-        fields = ('customer', 'review', 'rating')
+        fields = '__all__'
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
-    # product = ProductSerializer()
-
     class Meta:
         model = ProductImage
-        fields = (
-            'id', 'image_url',
-        )
+        fields = ('id', 'image_url')
 
 class ProductSerializer(serializers.ModelSerializer):
     get_image_url = ProductImageSerializer(many=True)
@@ -49,8 +46,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class GiftImageSerializer(serializers.ModelSerializer):
-    # product = ProductSerializer()
-
     class Meta:
         model = GiftImage
         fields = '__all__'
@@ -64,32 +59,14 @@ class GiftSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
-# class ProductImageSerializer(serializers.ModelSerializer):
-#     product = ProductSerializer()
-#
-#     class Meta:
-#         model = ProductImage
-#         fields = (
-#             'id', 'product', 'image', 'image_url',
-#         )
-
-# class AccountCartSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = CartItem
-#         fields = '__all__'
-
-
-
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     customer = CustomerSerializer()
 
     class Meta:
         model = CartItem
-        fields = ('id', 'customer', 'product', 'quantity')
+        fields = '__all__'
+
 
 class WishListSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
@@ -97,23 +74,20 @@ class WishListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WishList
-        fields = ('id', 'customer', 'product')
+        fields = '__all__'
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    # product = ProductSerializer()
-    # order = OrderSerializer()
-
     class Meta:
         model = OrderItem
         fields = '__all__'
 
 
 class ShippingAddressSerializer(serializers.ModelSerializer):
-    # customer = CustomerSerializer()
-
     class Meta:
         model = ShippingAddress
-        fields = ('id', 'address', 'city', 'state', 'date_added')
+        fields = '__all__'
+
 
 class OrderSerializer(serializers.ModelSerializer):
     customer = CustomerSerializer()
@@ -123,9 +97,6 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
-
-
-
 
 
 

@@ -8,7 +8,7 @@ class UserAdminConfig(UserAdmin):
     model = Customer
     search_fields = ('email', 'user_name', 'first_name',)
     list_filter = ('email', 'user_name', 'first_name', 'is_active', 'is_staff')
-    ordering = ('-start_date',)
+    ordering = ('-created_at',)
     list_display = ('email', 'user_name', 'first_name', 'is_active', 'is_staff')
 
     fieldsets = (
@@ -34,6 +34,7 @@ admin.site.register(Blog)
 admin.site.register(Product)
 admin.site.register(ProductImage)
 admin.site.register(Gift)
+admin.site.register(Coupon)
 admin.site.register(GiftImage)
 
 class CartItemAdminConfig(admin.ModelAdmin):
@@ -42,7 +43,7 @@ class CartItemAdminConfig(admin.ModelAdmin):
 admin.site.register(CartItem, CartItemAdminConfig)
 
 class OrderAdminConfig(admin.ModelAdmin):
-    list_display = ['customer', 'transaction_id', 'complete', 'delivered']
+    list_display = ['customer', 'transaction_id', 'complete', 'delivered', 'shipping_method']
 
 admin.site.register(Order, OrderAdminConfig)
 
@@ -50,7 +51,12 @@ class OrderItemAdminConfig(admin.ModelAdmin):
     list_display = ['order', 'product', 'quantity']
 
 admin.site.register(OrderItem, OrderItemAdminConfig)
-admin.site.register(ShippingAddress)
+
+
+class ShippingAddressAdminConfig(admin.ModelAdmin):
+    list_display = ['customer', 'phone_number', 'first_name', 'default_add']
+
+admin.site.register(ShippingAddress, ShippingAddressAdminConfig)
 admin.site.register(WishList)
 
 class ProductReviewAdminConfig(admin.ModelAdmin):
