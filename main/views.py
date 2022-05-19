@@ -275,6 +275,17 @@ def delete_address(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+def all_addresses(request):
+    all_addresses = ShippingAddress.objects.filter(customer=request.user)
+    if len(all_addresses) > 0:
+        serializer = ShippingAddressSerializer(all_addresses, many=True)
+        return Response({'msg': 'All saved addresses are here', "all_addresses": serializer.data})
+    else:
+        return Response({'msg':'No Addresses were found for this user'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
 def change_default_address(request):
     address = request.data.get('new_address')
     msg = 'trying...'

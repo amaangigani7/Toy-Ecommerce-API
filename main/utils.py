@@ -43,14 +43,14 @@ def get_create_address(address, user, parameter="both"):
 
 def send_email_after_registration(email, token):
     subject = 'Your email needs to be verified'
-    message = 'Hi paste the link to verify your account http://127.0.0.1:8000/main/verify/{}'.format(token)
+    message = 'Hi paste the link to verify your account https://srushtigosai123.pythonanywhere.com/main/verify/{}'.format(token)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email,]
     send_mail(subject, message, email_from, recipient_list)
 
 def send_email_for_password_reset(email, token):
     subject = 'Reset your password here'
-    message = 'Hi, click on the link to reset your password http://127.0.0.1:8000/main/change_password/{}'.format(token)
+    message = 'Hi, click on the link to reset your password https://srushtigosai123.pythonanywhere.com/main/change_password/{}'.format(token)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email,]
     send_mail(subject, message, email_from, recipient_list)

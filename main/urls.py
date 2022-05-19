@@ -39,6 +39,7 @@ urlpatterns = [
     path('verify_coupon/', views.verify_coupon, name='verify_coupon'),
     # path('buy_now/<slug:slug>/', views.buy_now, name='buy_now'),
     path('process_order/', views.process_order, name='process_order'),
+    path('all_addresses/', views.all_addresses, name='all_addresses'),
     path('change_default_address/', views.change_default_address, name='change_default_address'),
     path('add_address/', views.add_address, name='add_address'),
     path('delete_address/', views.delete_address, name='delete_address'),
