@@ -48,7 +48,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class GiftImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GiftImage
-        fields = '__all__'
+        fields = ('id', 'image_link')
 
 
 class GiftSerializer(serializers.ModelSerializer):

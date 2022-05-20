@@ -43,6 +43,7 @@ urlpatterns = [
     path('change_default_address/', views.change_default_address, name='change_default_address'),
     path('add_address/', views.add_address, name='add_address'),
     path('delete_address/', views.delete_address, name='delete_address'),
+    path('subscribe/', views.subscribe, name='subscribe'),
     # path('about/', views.about, name='about'),
     # path('contact_us/', views.contact_us, name='contact_us'),
     # path('faqs_and_blogs/', views.faqs, name='faqs_and_blogs'),

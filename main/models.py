@@ -177,6 +177,7 @@ class Gift(models.Model):
 class GiftImage(models.Model):
     gift = models.ForeignKey(Gift, on_delete=models.SET_NULL, null=True, blank=True)
     image = models.FileField(null=True, blank=True)
+    image_link = models.CharField(max_length=2000, null=True, blank=True)
 
     def __str__(self):
         return str(self.gift) + "'s image object"
@@ -305,7 +306,7 @@ class Coupon(models.Model):
         return self.name
 
 class Subsciber(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    email = models.EmailField(null=True)
 
     def __str__(self):
         return self.customer.user_name

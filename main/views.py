@@ -309,13 +309,19 @@ def change_default_address(request):
     return Response({'msg': msg, "new_address": ShippingAddressSerializer(new_add).data})
 
 
+@api_view(['POST'])
+def subscribe(request):
+    email = request.data.get('email')
+    subcribe, created = Subsciber.objects.get_or_create(email=email)
+    if created == False:
+        return Response({'msg': 'You are already subscribed'})
+    else:
+        return Response({'msg': 'Your email has been added to the subscriber list'})
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def add_to_cart(request, slug):
-    print(slug, request)
     product = Product.objects.get(slug=slug)
-    # if CartItem.objects.get(customer=request.user, product=product):
     try:
         c = CartItem.objects.get(customer=request.user, product=product)
         c.quantity += 1
