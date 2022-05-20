@@ -197,7 +197,8 @@ def process_order(request):
                 order.transaction_id = transaction_id
                 client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
                 DATA = {
-                    "amount": int(str(order.get_order_total)[:-3]),
+                    # "amount": int(str(order.get_order_total)[:-3]),
+                    "amount": int(final_bill),
                     "currency": "INR",
                     'payment_capture': '1'
                 }
