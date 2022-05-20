@@ -58,6 +58,7 @@ class Blog(models.Model):
     title = models.CharField(max_length=255, unique=True)
     content = models.TextField()
     slug = models.SlugField(unique=True, null=True, blank=True)
+    image_link = models.CharField(max_length=2000, null=True, blank=True)
     posted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -122,14 +123,15 @@ class Product(models.Model):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     image = models.FileField(null=True, blank=True)
+    image_link = models.CharField(max_length=2000, null=True, blank=True)
 
-    @property
-    def image_url(self):
-        try:
-            url = 'http://127.0.0.1:8000' + self.image.url
-        except:
-            url = ''
-        return url
+    # @property
+    # def image_url(self):
+    #     try:
+    #         url = 'http://127.0.0.1:8000' + self.image.url
+    #     except:
+    #         url = ''
+    #     return url
 
     def __str__(self):
         return self.product.name
@@ -301,3 +303,9 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.name
+
+class Subsciber(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.customer.user_name

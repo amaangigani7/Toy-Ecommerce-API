@@ -14,7 +14,7 @@ class BlogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blog
-        fields = ('author', 'title', 'content', 'posted_at')
+        fields = ('author', 'title', 'content', 'posted_at', 'image_link')
 
 class ContactUsSerializer(serializers.ModelSerializer):
 
@@ -33,7 +33,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ('id', 'image_url')
+        fields = ('id', 'image_link')
 
 class ProductSerializer(serializers.ModelSerializer):
     get_image_url = ProductImageSerializer(many=True)
