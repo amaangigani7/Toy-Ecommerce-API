@@ -309,4 +309,14 @@ class Subsciber(models.Model):
     email = models.EmailField(null=True)
 
     def __str__(self):
-        return self.customer.user_name
+        return self.email
+
+class NotificationSend(models.Model):
+    title = models.CharField(max_length=255)
+
+    def save(self, *args, **kwargs):
+        send_email_to_all_subscribers()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title

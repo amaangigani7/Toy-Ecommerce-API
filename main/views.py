@@ -97,12 +97,22 @@ def product_review(request, slug):
     text = request.data.get('review')
     rating = request.data.get('rating')
     try:
-        pr = ProductReview.objects.create(customer=request.user, product=product, review=text, rating=rating)
-        pr.save()
-        msg = "Review Posted."
+        order_list = Order.objects.filter(customer=request.user)
+        for i in order_list:
+            # print("i: ", i, "order_items: ", i.get_order_items)
+            for j in i.get_order_items:
+                # print("j.product: ", j.product)
+                if product == j.product:
+                    # print('product order found!')
+                    try:
+                        pr = ProductReview.objects.create(customer=request.user, product=product, review=text, rating=rating)
+                        pr.save()
+                        msg = "Review Posted."
+                    except:
+                        msg = "Review Already present try editing the existing one."
     except:
-        msg = "Review Already present try editing the existing one."
-    return Response({"msg": msg})
+        # print('you have not ordered the item to review')
+        return Response({"msg": msg})
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
@@ -206,6 +216,7 @@ def process_order(request):
                 print(payment)
                 order.complete = True
                 order.save()
+                send_email_after_purchase(order)
                 msg = 'order placed!'
                 cart_items = CartItem.objects.filter(customer=request.user)
                 for i in cart_items:
@@ -318,6 +329,17 @@ def subscribe(request):
         return Response({'msg': 'You are already subscribed'})
     else:
         return Response({'msg': 'Your email has been added to the subscriber list'})
+
+
+@api_view(['POST'])
+def unsubscribe(request):
+    email = request.data.get('email')
+    try:
+        subcriber = Subsciber.objects.get(email=email)
+        subcriber.delete()
+        return Response({'msg': 'You have been unsubscribed'})
+    except:
+        return Response({'msg': "No subscription found to unsubscribe"})
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
