@@ -35,7 +35,8 @@ admin.site.register(Product)
 admin.site.register(ProductImage)
 admin.site.register(Gift)
 admin.site.register(Coupon)
-admin.site.register(Subsciber)
+admin.site.register(Subscriber)
+admin.site.register(NotificationSend)
 admin.site.register(GiftImage)
 
 class CartItemAdminConfig(admin.ModelAdmin):

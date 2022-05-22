@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 from os import listdir
-from main.models import *
+from .models import *
 import pandas as pd
 import os
 
@@ -23,7 +23,6 @@ def get_create_address(address, user, parameter="both"):
         return new_add, created
     elif parameter == 'get':
         try:
-            print('entered elif')
             new_add = ShippingAddress.objects.filter(
                 customer = user,
                 first_name = address['first_name'],
@@ -60,6 +59,15 @@ def send_email_after_purchase(order):
     message = 'Hi, Your order has been placed for {} of amount {}'.format(order.get_order_items, order.get_order_total)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [order.customer.email,]
+    send_mail(subject, message, email_from, recipient_list)
+
+def send_email_to_all_subscribers(title, message):
+    from main.models import Subscriber
+    subject = title
+    message = message
+    email_from = settings.EMAIL_HOST_USER
+    sub_list = Subscriber.objects.all()
+    recipient_list = sub_list
     send_mail(subject, message, email_from, recipient_list)
 
 def check_coupon(coupon, user):

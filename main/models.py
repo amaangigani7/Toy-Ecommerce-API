@@ -6,6 +6,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.template.defaultfilters import slugify
+from .utils import *
 import random
 from datetime import datetime, timedelta
 # Create your models here.
@@ -305,18 +306,19 @@ class Coupon(models.Model):
     def __str__(self):
         return self.name
 
-class Subsciber(models.Model):
+class Subscriber(models.Model):
     email = models.EmailField(null=True)
 
     def __str__(self):
         return self.email
 
 class NotificationSend(models.Model):
-    title = models.CharField(max_length=255)
+    subject = models.CharField(max_length=255, null=True)
+    message = models.TextField(null=True)
 
     def save(self, *args, **kwargs):
-        send_email_to_all_subscribers()
+        send_email_to_all_subscribers(self.subject, self.message)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        return self.subject
