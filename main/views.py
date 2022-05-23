@@ -324,7 +324,7 @@ def change_default_address(request):
 @api_view(['POST'])
 def subscribe(request):
     email = request.data.get('email')
-    subcribe, created = Subsciber.objects.get_or_create(email=email)
+    subcribe, created = Subscriber.objects.get_or_create(email=email)
     if created == False:
         return Response({'msg': 'You are already subscribed'})
     else:
@@ -335,7 +335,7 @@ def subscribe(request):
 def unsubscribe(request):
     email = request.data.get('email')
     try:
-        subcriber = Subsciber.objects.get(email=email)
+        subcriber = Subscriber.objects.get(email=email)
         subcriber.delete()
         return Response({'msg': 'You have been unsubscribed'})
     except:
