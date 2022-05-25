@@ -3,6 +3,16 @@ from rest_framework.response import Response
 from .models import *
 import uuid
 
+class MakerClassReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MakerClassReview
+        fields = '__all__'
+
+class GlobalReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GlobalReview
+        fields = '__all__'
+
 class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -35,13 +45,26 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ('id', 'image_link')
 
+class SimilarProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SimilarProduct
+        fields = ('id', 'slug')
+
 class ProductSerializer(serializers.ModelSerializer):
     get_image_url = ProductImageSerializer(many=True)
     get_reviews = ProductReviewSerializer(many=True)
     get_product_rating = serializers.FloatField()
+    get_similar_products = SimilarProductSerializer(many=True)
 
     class Meta:
         model = Product
+        fields = '__all__'
+
+class SpecialProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+
+    class Meta:
+        model = SpecialProduct
         fields = '__all__'
 
 

@@ -103,7 +103,10 @@ class Product(models.Model):
         s = 0
         for i in reviews:
             s += int(i.rating)
-        return s
+        if s > 0:
+            return s/l
+        else:
+            return None
 
     @property
     def get_image_url(self):
@@ -111,6 +114,11 @@ class Product(models.Model):
         # breakpoint()
         # total = sum([item.get_total for item in order_items])
         return image_urls
+
+    def get_similar_products(self):
+        similar = self.similarproduct_set.all()
+        return similar
+
 
     @property
     def get_reviews(self):
@@ -322,3 +330,41 @@ class NotificationSend(models.Model):
 
     def __str__(self):
         return self.subject
+
+class SimilarProduct(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    slug = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.product.name + ' --- ' + self.slug
+
+class SpecialProduct(models.Model):
+    type_choices = (("Featured", "Featured"), ("New Arrivals", "New Arrivals"), ('Classics', "Classics"))
+
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    type = models.CharField(max_length=255, choices=type_choices)
+
+    def __str__(self):
+        return self.type + ' --- ' + self.product.name
+
+class GlobalReview(models.Model):
+    by = models.CharField(max_length=255)
+    review = models.TextField()
+    rating = models.IntegerField()
+    img_link = models.CharField(max_length=2000)
+
+    def __str__(self):
+        return self.by
+
+class MakerClassReview(models.Model):
+    type_choices = (("Schools", "Schools"), ("NGOs", "NGOs"), ('Hobby Centers', "Hobby Centers"), ('Clubs', "Clubs"))
+
+    by = models.CharField(max_length=255)
+    review = models.TextField()
+    rating = models.IntegerField()
+    img_link = models.CharField(max_length=2000)
+    type = models.CharField(max_length=255, choices=type_choices)
+
+
+    def __str__(self):
+        return self.by

@@ -36,8 +36,13 @@ admin.site.register(ProductImage)
 admin.site.register(Gift)
 admin.site.register(Coupon)
 admin.site.register(Subscriber)
+admin.site.register(SimilarProduct)
+admin.site.register(SpecialProduct)
 admin.site.register(NotificationSend)
 admin.site.register(GiftImage)
+admin.site.register(MakerClassReview)
+admin.site.register(GlobalReview)
+
 
 class CartItemAdminConfig(admin.ModelAdmin):
     list_display = ['customer', 'product', 'quantity']

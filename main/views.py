@@ -37,6 +37,25 @@ def home(request):
     return render(request, 'main/home.html')
 
 @api_view(['GET'])
+def special_products(request):
+    sp = SpecialProduct.objects.all()
+    serializer = SpecialProductSerializer(sp, many=True)
+    return Response({'special_products': serializer.data})
+
+@api_view(['GET'])
+def global_reviews(request):
+    gr = GlobalReview.objects.all()
+    serializer = GlobalReviewSerializer(gr, many=True)
+    return Response({'global_reviews': serializer.data})
+
+@api_view(['GET'])
+def maker_class_reviews(request):
+    mcr = MakerClassReview.objects.all()
+    serializer = MakerClassReviewSerializer(mcr, many=True)
+    return Response({'maker_class_reviews': serializer.data})
+
+
+@api_view(['GET'])
 def products(request):
     products = Product.objects.all()
     serializer = ProductSerializer(products, many=True)
@@ -48,7 +67,6 @@ def product_detail(request, slug):
     product = Product.objects.get(slug=slug)
     img_lis = ProductImage.objects.filter(product=product)
     serializer = ProductSerializer(product)
-    # img_serializer = ProductImageSerializer(img_lis, many=True)
     return Response({'product': serializer.data})
 
 @api_view(['GET'])
