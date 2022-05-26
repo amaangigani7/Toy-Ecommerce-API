@@ -151,13 +151,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        print('validated_data= ', validated_data)
+        # print('validated_data= ', validated_data)
         while True:
             auth_token = str(uuid.uuid4())
             if not Customer.objects.filter(verification_token=auth_token).first():
                 break
         customer = Customer.objects.create(user_name=validated_data['user_name'], email=validated_data['email'], verification_token=auth_token)
         customer.set_password(validated_data['password'])
-        print("password", customer.password)
+        # print("password", customer.password)
         customer.save()
         return customer

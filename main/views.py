@@ -430,9 +430,13 @@ def quantity_change_cart(request):
     c = CartItem.objects.get(customer=request.user, product=product)
     if operation == "+":
         c.quantity += 1
+        c.save()
     if operation == "-":
         c.quantity -= 1
-    c.save()
+        if c.quantity <= 0:
+            c.delete()
+        else:
+            c.save()
     cart = CartItem.objects.filter(customer=request.user)
     # img_lis = ProductImage.objects.filter(product=product)
     # serializer = ProductSerializer(product)
@@ -537,7 +541,6 @@ class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
-        print(request.data['user_name'])
         if '.' in request.data['user_name']:
             return Response({"message": 'Username cannot have a "."'})
         if Customer.objects.filter(user_name=request.data['user_name']):
@@ -548,12 +551,11 @@ class RegisterAPI(generics.GenericAPIView):
         # serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             # serializer.save()
-            print('serializer: ', serializer)
             customer = serializer.save()
             send_email_after_registration(request.data['email'], token=Customer.objects.get(user_name=request.data['user_name']).verification_token)
             return Response({
+            "status": status.HTTP_200_OK,
             "user": CustomerSerializer(customer, context=self.get_serializer_context()).data,
-            # "token": AuthToken.objects.create(customer)[1],
             "message": 'An Email has been sent to your email ID if it was valid.'
             })
         return Response({"Errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

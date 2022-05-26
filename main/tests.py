@@ -3,6 +3,19 @@ from main.models import *
 from django.core import serializers
 # Create your tests here.
 
+# purge_old_data.py
+
+# from django.core.management.base import BaseCommand, CommandError
+# from cus_leads.models import CustomerLeads
+# from datetime import datetime, timedelta
+#
+# class Command(BaseCommand):
+#     help = 'Delete objects older than 10 days'
+#
+#     def handle(self, *args, **options):
+#         CustomerLeads.objects.filter(posting_date__lte=datetime.now()-timedelta(days=10)).delete()
+#         self.stdout.write('Deleted objects older than 10 days')
+
 # products = Product.objects.all()
 # for i in products:
 #     sp = SimilarProduct()
