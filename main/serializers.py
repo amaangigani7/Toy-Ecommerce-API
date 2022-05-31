@@ -33,11 +33,11 @@ class ContactUsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductReviewSerializer(serializers.ModelSerializer):
-    customer = CustomerSerializer()
+    # customer = CustomerSerializer()
 
     class Meta:
         model = ProductReview
-        fields = '__all__'
+        fields = ('id', 'by', 'product', 'rating', 'review', 'edited_on')
 
 
 class ProductImageSerializer(serializers.ModelSerializer):

@@ -157,6 +157,9 @@ class ProductReview(models.Model):
     class Meta:
         unique_together = [['customer', 'product']]
 
+    def by(self):
+        return self.customer.user_name
+
     def __str__(self):
         return "{}'s review on {}".format(self.customer.user_name, self.product.name)
 
