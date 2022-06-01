@@ -391,6 +391,18 @@ def add_to_cart(request, slug):
     # data = list(json.dumps(msg)) + list(serializers.serialize('json', products))
     # return HttpResponse(data, content_type="application/json")
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_full_cart(request):
+    cart = CartItem.objects.filter(customer=request.user)
+    if len(cart) < 1:
+        msg = 'Empty Cart!'
+    else:
+        cart_serializer = CartItemSerializer(cart, many=True)
+        msg = 'Cart found!'
+    return Response({'msg': msg, 'full_cart': cart_serializer.data})
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def add_to_wishlist(request, slug):
