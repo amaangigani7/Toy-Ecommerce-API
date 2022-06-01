@@ -209,10 +209,13 @@ class ContactUs(models.Model):
 class CartItem(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
-    quantity = models.IntegerField(null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True, default=1)
 
     class Meta:
         unique_together = [['customer', 'product']]
+
+    def item_total(self):
+        return self.quantity * self.product.sale_price
 
     def __str__(self):
         return "{}'s cart".format(self.customer.user_name)

@@ -376,13 +376,12 @@ def add_to_cart(request, slug):
 
     # print(c)
     cart = CartItem.objects.filter(customer=request.user)
-    # img_lis = ProductImage.objects.filter(product=product)
-    # serializer = ProductSerializer(product)
-    # img_serializer = ProductImageSerializer(img_lis, many=True)
-    # cart_item_serializer = CartItemSerializer(c)
+    total = 0
+    for i in cart:
+        total += i.item_total()
     msg = "{} added to {}'s cart. Current Quantity: {}".format(c.product.name, request.user, c.quantity)
     cart_serializer = CartItemSerializer(cart, many=True)
-    return Response({'msg': msg, 'full_cart': cart_serializer.data})
+    return Response({'msg': msg, 'full_cart': cart_serializer.data, "total": total})
     # return Response({'cart_item': cart_item_serializer.data, 'full_cart': cart_serializer.data})
     # return Response({'message': 'product found.'})
 
@@ -398,9 +397,12 @@ def get_full_cart(request):
     if len(cart) < 1:
         msg = 'Empty Cart!'
     else:
+        total = 0
+        for i in cart:
+            total += i.item_total()
         cart_serializer = CartItemSerializer(cart, many=True)
         msg = 'Cart found!'
-    return Response({'msg': msg, 'full_cart': cart_serializer.data})
+    return Response({'msg': msg, 'full_cart': cart_serializer.data, 'total': total})
 
 
 @api_view(['POST'])
