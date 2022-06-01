@@ -34,6 +34,7 @@ urlpatterns = [
     path('products/review/edit/<slug:slug>/', views.product_review_edit, name='product_review_edit'),
     path('add_to_cart/<slug:slug>/', views.add_to_cart, name='add_to_cart'),
     path('get_full_cart/', views.get_full_cart, name='get_full_cart'),
+    path('empty_cart/', views.empty_cart, name='empty_cart'),
     path('add_to_wishlist/<slug:slug>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('remove_from_wishlist/<slug:slug>/', views.remove_from_wishlist, name='remove_from_wishlist'),
     path('quantity_change_cart/', views.quantity_change_cart, name='quantity_change_cart'),

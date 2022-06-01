@@ -390,19 +390,29 @@ def add_to_cart(request, slug):
     # data = list(json.dumps(msg)) + list(serializers.serialize('json', products))
     # return HttpResponse(data, content_type="application/json")
 
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def empty_cart(request):
+    cart = CartItem.objects.filter(customer=request.user)
+    for i in cart:
+        i.delete()
+    return Response({'msg': "Cart emptied!"})
+
+
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_full_cart(request):
     cart = CartItem.objects.filter(customer=request.user)
     if len(cart) < 1:
-        msg = 'Empty Cart!'
+        return Response({'msg': "cart empty!"})
     else:
         total = 0
         for i in cart:
             total += i.item_total()
         cart_serializer = CartItemSerializer(cart, many=True)
         msg = 'Cart found!'
-    return Response({'msg': msg, 'full_cart': cart_serializer.data, 'total': total})
+        return Response({'msg': msg, 'full_cart': cart_serializer.data, 'total': total})
 
 
 @api_view(['POST'])
