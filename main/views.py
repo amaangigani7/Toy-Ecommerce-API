@@ -164,7 +164,7 @@ def account_edit(request):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def cart_checkout(request):
-    order, created = Order.objects.get_or_create(customer=request.user, complete=False)
+    order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
     order.save()
     cart_items = CartItem.objects.filter(customer=request.user)
     if len(cart_items) > 0:
@@ -215,7 +215,7 @@ def process_order(request):
         dis = check_coupon(coupon_code, request.user)
         transaction_id = datetime.datetime.now().timestamp()
         try:
-            order = Order.objects.get(customer=request.user, complete=False)
+            order = Order.objects.get(customer=request.user, ordered=False)
             final_bill = order.get_order_total * (100- dis) / 100
             print(final_bill)
             if str(order_total) == str(final_bill):
@@ -232,7 +232,7 @@ def process_order(request):
                 }
                 payment = client.order.create(data=DATA)
                 print(payment)
-                order.complete = True
+                order.ordered = True
                 order.save()
                 send_email_after_purchase(order)
                 msg = 'order placed!'
@@ -470,22 +470,43 @@ def quantity_change_cart(request):
     cart_serializer = CartItemSerializer(cart, many=True)
     return Response({'msg': msg, 'full_cart': cart_serializer.data})
 
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def return_order(request):
+    pk = request.data.get('pk')
+    order = Order.objects.filter(pk=pk)
+    if len(order) == 1:
+        curr_order = order[0]
+        if request.user == curr_order.customer:
+            curr_order.returned = True
+            curr_order.save()
+            msg = "Your order has been returned"
+        else:
+            msg = "You can only return your orders."
+    else:
+        msg = "Order could not be fetched."
+    return Response({'msg': msg})
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def your_account(request):
     # print(request.user)
     cart_items = CartItem.objects.filter(customer=request.user)
-    orders = Order.objects.filter(customer=request.user)
+    past_orders = Order.objects.filter(customer=request.user, delivered=True)
+    upcoming_orders = Order.objects.filter(customer=request.user, delivered=False)
+    returned_orders = Order.objects.filter(customer=request.user, returned=True)
     # print(cart_items)
     # print(orders)
     # product = Product.objects.get(slug=slug)
     # img_lis = ProductImage.objects.filter(product=product)
     serializer = CartItemSerializer(cart_items, many=True)
-    cart_return = serializer.data
+    # cart_return = serializer.data
     # if len(orders) > 0:
-    o_serializer = OrderSerializer(orders, many=True)
-    orders_return = o_serializer.data
+    p_serializer = OrderSerializer(past_orders, many=True)
+    u_serializer = OrderSerializer(upcoming_orders, many=True)
+    r_serializer = OrderSerializer(returned_orders, many=True)
+    # orders_return = o_serializer.data
     # print(serializer)
     # o_serializer = OrderSerializer(orders)
     # print(o_serializer)
@@ -495,7 +516,9 @@ def your_account(request):
     # 'order_details': o_serializer.data, 'cart_items': serializer.data
     return Response({
         'message': "this is your account - {}".format(request.user),
-        'order_details': o_serializer.data,
+        'past_orders': p_serializer.data,
+        'upcoming_orders': u_serializer.data,
+        'returned_orders': r_serializer.data,
         'cart_items': serializer.data
         })
     # all_objects = list(orders) + list(cart_items)
@@ -595,6 +618,7 @@ class RegisterAPI(generics.GenericAPIView):
 @api_view(['GET'])
 def verify(request, auth_token):
     try:
+        print(auth_token)
         customer = Customer.objects.filter(verification_token=auth_token).first()
         if customer:
             if customer.is_active:

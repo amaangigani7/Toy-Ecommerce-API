@@ -262,9 +262,13 @@ class Order(models.Model):
 
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     date_ordered = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    complete = models.BooleanField(default=False)
     transaction_id = models.CharField(null=True, blank=True, max_length=255)
+    ordered = models.BooleanField(default=False)
+    shipped = models.BooleanField(default=False)
+    out_for_delivery = models.BooleanField(default=False)
+    arriving_today = models.BooleanField(default=False)
     delivered = models.BooleanField(default=False, choices=delivered_choices)
+    returned = models.BooleanField(default=False)
     shipping_method = models.CharField(null=True, blank=True, max_length=255)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -285,7 +289,7 @@ class Order(models.Model):
         return order_items
 
     def __str__(self):
-        if self.complete == True:
+        if self.ordered == True:
             return str(self.transaction_id)
         else:
             return str(self.id)

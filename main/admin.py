@@ -50,7 +50,21 @@ class CartItemAdminConfig(admin.ModelAdmin):
 admin.site.register(CartItem, CartItemAdminConfig)
 
 class OrderAdminConfig(admin.ModelAdmin):
-    list_display = ['customer', 'transaction_id', 'complete', 'delivered', 'shipping_method']
+    list_display = ['customer', 'transaction_id', 'ordered', "returned", "shipped", "out_for_delivery", "arriving_today", 'delivered', 'shipping_method', "shipping_address"]
+
+    def has_change_permission(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            return True
+
+    def has_module_permission(self, request):
+        if request.user.is_staff:
+            return True
+
+    def get_form(self, request, obj=None, **kwargs):
+        if request.user.is_staff==True and request.user.is_superuser==False:
+            self.exclude = ("customer", "complete", "shipping_address" )
+        form = super(OrderAdminConfig, self).get_form(request, obj, **kwargs)
+        return form
 
 admin.site.register(Order, OrderAdminConfig)
 
