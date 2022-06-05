@@ -49,16 +49,32 @@ class SimilarProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = SimilarProduct
         fields = ('id', 'slug')
+#
+# def find_wishlisted(slug, user):
+#     # for i in WishList.objects.filter(customer=user):
+#     #     print(i)
+#     # print(Product.objects.get(slug=slug))
+#     if user != "None":
+#         if Product.objects.get(slug=slug) in WishList.objects.filter(customer=user):
+#             return True
+#     else:
+#         return False
 
 class ProductSerializer(serializers.ModelSerializer):
     get_image_url = ProductImageSerializer(many=True)
     get_reviews = ProductReviewSerializer(many=True)
     get_product_rating = serializers.FloatField()
     get_similar_products = SimilarProductSerializer(many=True)
-
+    
     class Meta:
         model = Product
         fields = '__all__'
+
+    # def get_is_wishlisted(self, obj):
+    #     try:
+    #         return find_wishlisted(obj.slug, self.context['request'].user)
+    #     except:
+    #         return find_wishlisted(obj.slug, "None")
 
 class SpecialProductSerializer(serializers.ModelSerializer):
     product = ProductSerializer()

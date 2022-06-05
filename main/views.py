@@ -57,9 +57,24 @@ def maker_class_reviews(request):
 
 @api_view(['GET'])
 def products(request):
-    products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
-    return Response({'all_products': serializer.data})
+    if request.user.is_authenticated:
+        products = Product.objects.all()
+        wishlisted = []
+        non_wishlisted = []
+        for i in WishList.objects.filter(customer=request.user):
+            wishlisted.append(i.product)
+        for i in products:
+            if i not in wishlisted:
+                non_wishlisted.append(i)
+        serializer_1 = ProductSerializer(non_wishlisted, many=True)
+        serializer_2 = ProductSerializer(wishlisted, many=True)
+        print(wishlisted)
+        print(non_wishlisted)
+        return Response({'wishlisted': serializer_1.data, 'non_wishlisted': serializer_2.data})
+    else:
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response({'non_wishlisted': serializer.data})
 
 
 @api_view(['GET'])

@@ -109,6 +109,12 @@ class Product(models.Model):
         else:
             return None
 
+    # def is_wishlisted(self, user):
+    #     if self.name in WishList.objects.filter(customer=user):
+    #         return True
+    #     else:
+    #         return False
+
     @property
     def get_image_url(self):
         image_urls = self.productimage_set.all()
@@ -230,7 +236,7 @@ class WishList(models.Model):
         unique_together = [['customer', 'product']]
 
     def __str__(self):
-        return "{}'s wishlist".format(self.customer.user_name)
+        return "{} - {}".format(self.customer.user_name, self.product.name)
 
 
 class ShippingAddress(models.Model):
