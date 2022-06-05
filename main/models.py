@@ -96,6 +96,7 @@ class Product(models.Model):
     real_life_connect = models.TextField(null=True, blank=True)
     technical_details = models.TextField(null=True, blank=True)
 
+
     @property
     def get_product_rating(self):
         reviews = self.get_reviews

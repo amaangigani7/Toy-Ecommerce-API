@@ -492,7 +492,8 @@ def return_order(request):
 @permission_classes([permissions.IsAuthenticated])
 def your_account(request):
     # print(request.user)
-    cart_items = CartItem.objects.filter(customer=request.user)
+    # cart_items = CartItem.objects.filter(customer=request.user)
+    wish_list = WishList.objects.filter(customer=request.user)
     past_orders = Order.objects.filter(customer=request.user, delivered=True)
     upcoming_orders = Order.objects.filter(customer=request.user, delivered=False)
     returned_orders = Order.objects.filter(customer=request.user, returned=True)
@@ -500,7 +501,8 @@ def your_account(request):
     # print(orders)
     # product = Product.objects.get(slug=slug)
     # img_lis = ProductImage.objects.filter(product=product)
-    serializer = CartItemSerializer(cart_items, many=True)
+    # serializer = CartItemSerializer(cart_items, many=True)
+    serializer = WishListSerializer(wish_list, many=True)
     # cart_return = serializer.data
     # if len(orders) > 0:
     p_serializer = OrderSerializer(past_orders, many=True)
@@ -519,7 +521,7 @@ def your_account(request):
         'past_orders': p_serializer.data,
         'upcoming_orders': u_serializer.data,
         'returned_orders': r_serializer.data,
-        'cart_items': serializer.data
+        'wish_list': serializer.data
         })
     # all_objects = list(orders) + list(cart_items)
     # data = serializers.serialize('json', all_objects)
