@@ -76,7 +76,6 @@ def check_coupon(coupon, user):
     c = Coupon.objects.filter(is_active=True)
     for i in c:
         if i.name == coupon and (i.customer == user or i.customer == None):
-            print("you get a discount of {}%".format(i.discount))
             dis = i.discount
             break
     return dis

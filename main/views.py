@@ -204,7 +204,7 @@ def verify_coupon(request):
     if discount == 0:
         msg = 'Coupon is not valid'
     else:
-        msg = 'Coupon gave a discount of {}'.format(discount)
+        msg = '{}'.format(discount)
     return Response({'msg': msg})
 
 
