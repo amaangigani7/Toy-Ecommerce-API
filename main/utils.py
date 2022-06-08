@@ -72,6 +72,7 @@ def send_email_to_all_subscribers(title, message):
 
 def check_coupon(coupon, user):
     dis = 0
+    from .models import Coupon
     c = Coupon.objects.filter(is_active=True)
     for i in c:
         if i.name == coupon and (i.customer == user or i.customer == None):
