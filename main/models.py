@@ -284,7 +284,6 @@ class Order(models.Model):
     out_for_delivery = models.BooleanField(default=False)
     arriving_today = models.BooleanField(default=False)
     delivered = models.BooleanField(default=False, choices=delivered_choices)
-    returned = models.BooleanField(default=False)
     shipping_method = models.CharField(null=True, blank=True, max_length=255)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -315,10 +314,13 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.IntegerField(null=True, blank=True, default=0)
-    date_added = models.DateTimeField(auto_now_add=True)
+    placed_on = models.DateTimeField(auto_now_add=True)
+    returned = models.BooleanField(default=False)
+    refunded = models.BooleanField(default=False)
 
     class Meta:
         unique_together = [['order', 'product']]
+        ordering = ['-placed_on']
 
     @property
     def get_total(self):
@@ -327,6 +329,14 @@ class OrderItem(models.Model):
     @property
     def product_name(self):
         return self.product.name
+
+    def image_link(self):
+        img = ProductImage.objects.filter(product=self.product)
+        return img[0].image_link
+
+    def item_status(self):
+        return self.order.ordered, self.order.shipped, self.order.out_for_delivery, self.order.arriving_today
+
 
     def change_address(self, new_add):
         return new_add

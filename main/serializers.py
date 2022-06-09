@@ -124,7 +124,8 @@ class WishListSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ('id', 'order', 'product_name', 'quantity', 'date_added')
+        fields = ('id', 'order', 'image_link', 'product_name', 'quantity',
+                    'get_total', 'placed_on', 'item_status', 'returned', 'refunded')
 
 
 class ShippingAddressSerializer(serializers.ModelSerializer):
@@ -179,6 +180,5 @@ class RegisterSerializer(serializers.ModelSerializer):
                 break
         customer = Customer.objects.create(user_name=validated_data['user_name'], email=validated_data['email'], verification_token=auth_token)
         customer.set_password(validated_data['password'])
-        # print("password", customer.password)
         customer.save()
         return customer

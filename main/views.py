@@ -493,12 +493,11 @@ def quantity_change_cart(request):
 @permission_classes([permissions.IsAuthenticated])
 def return_order(request):
     pk = request.data.get('pk')
-    order = Order.objects.filter(pk=pk)
-    if len(order) == 1:
-        curr_order = order[0]
-        if request.user == curr_order.customer:
-            curr_order.returned = True
-            curr_order.save()
+    order_item = OrderItem.objects.get(pk=pk)
+    if order_item:
+        if request.user == order_item.order.customer:
+            order_item.returned = True
+            order_item.save()
             msg = "Your order has been returned"
         else:
             msg = "You can only return your orders."
@@ -513,9 +512,9 @@ def your_account(request):
     # print(request.user)
     # cart_items = CartItem.objects.filter(customer=request.user)
     wish_list = WishList.objects.filter(customer=request.user)
-    past_orders = Order.objects.filter(customer=request.user, delivered=True)
-    upcoming_orders = Order.objects.filter(customer=request.user, delivered=False)
-    returned_orders = Order.objects.filter(customer=request.user, returned=True)
+    past_orders = OrderItem.objects.filter(order__customer=request.user, order__delivered=True, returned=False)
+    upcoming_orders = OrderItem.objects.filter(order__customer=request.user, order__delivered=False, returned=False)
+    returned_orders = OrderItem.objects.filter(order__customer=request.user, returned=True)
     # print(cart_items)
     # print(orders)
     # product = Product.objects.get(slug=slug)
@@ -524,9 +523,9 @@ def your_account(request):
     serializer = WishListSerializer(wish_list, many=True)
     # cart_return = serializer.data
     # if len(orders) > 0:
-    p_serializer = OrderSerializer(past_orders, many=True)
-    u_serializer = OrderSerializer(upcoming_orders, many=True)
-    r_serializer = OrderSerializer(returned_orders, many=True)
+    p_serializer = OrderItemSerializer(past_orders, many=True)
+    u_serializer = OrderItemSerializer(upcoming_orders, many=True)
+    r_serializer = OrderItemSerializer(returned_orders, many=True)
     # orders_return = o_serializer.data
     # print(serializer)
     # o_serializer = OrderSerializer(orders)
