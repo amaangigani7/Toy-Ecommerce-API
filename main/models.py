@@ -6,7 +6,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.template.defaultfilters import slugify
-from .utils import *
 import random
 from datetime import datetime, timedelta
 # Create your models here.
@@ -181,6 +180,16 @@ class Gift(models.Model):
     on_sale = models.BooleanField(default='NO', choices=sale_choices)
     category = models.CharField(max_length=100, null=True, blank=True)
     slug = models.SlugField(null=True, unique=True, blank=True)
+    meta_description = models.TextField(null=True, blank=True)
+    short_description = models.TextField(null=True, blank=True)
+    strip_menu = models.CharField(max_length=200, null=True, blank=True)
+    mega_menu = models.TextField(null=True, blank=True)
+    tags = models.TextField(null=True, blank=True)
+    in_stock = models.BooleanField(default=True, null=True, blank=True)
+    skills_and_learnings = models.TextField(null=True, blank=True)
+    real_life_connect = models.TextField(null=True, blank=True)
+    technical_details = models.TextField(null=True, blank=True)
+
 
     @property
     def get_image_url(self):
@@ -315,6 +324,10 @@ class OrderItem(models.Model):
     def get_total(self):
         return self.product.sale_price * self.quantity
 
+    @property
+    def product_name(self):
+        return self.product.name
+
     def change_address(self, new_add):
         return new_add
 
@@ -342,7 +355,13 @@ class NotificationSend(models.Model):
     message = models.TextField(null=True)
 
     def save(self, *args, **kwargs):
-        send_email_to_all_subscribers(self.subject, self.message)
+        subject = self.subject
+        message = self.message
+        email_from = settings.EMAIL_HOST_USER
+        sub_list = Subscriber.objects.all()
+        recipient_list = sub_list
+        send_mail(subject, message, email_from, recipient_list)
+        # send_email_to_all_subscribers(self.subject, self.message)
         super().save(*args, **kwargs)
 
     def __str__(self):

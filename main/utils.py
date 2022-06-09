@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from os import listdir
 from .models import *
+from .models import ShippingAddress
 import pandas as pd
 import os
 

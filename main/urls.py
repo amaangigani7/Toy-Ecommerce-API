@@ -40,6 +40,7 @@ urlpatterns = [
     path('quantity_change_cart/', views.quantity_change_cart, name='quantity_change_cart'),
     path('cart_checkout/', views.cart_checkout, name='cart_checkout'),
     path('verify_coupon/', views.verify_coupon, name='verify_coupon'),
+    path('customer_coupons/', views.customer_coupons, name='customer_coupons'),
     path('return_order/', views.return_order, name='return_order'),
     # path('buy_now/<slug:slug>/', views.buy_now, name='buy_now'),
     path('process_order/', views.process_order, name='process_order'),

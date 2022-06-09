@@ -202,10 +202,20 @@ def verify_coupon(request):
     coupon = request.data.get('coupon')
     discount = check_coupon(coupon, request.user)
     if discount == 0:
-        msg = 'Coupon is not valid'
+        msg = 'Coupon is not valid for you'
     else:
         msg = '{}'.format(discount)
     return Response({'msg': msg})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def customer_coupons(request):
+    coupons = Coupon.objects.filter(customer=request.user)
+    if len(coupons) > 0:
+        serializer = CouponSerializer(coupons, many=True)
+        return Response({'coupons': serializer.data})
+    else:
+        return Response({'msg': "No coupons found!"})
 
 
 
@@ -214,23 +224,17 @@ def verify_coupon(request):
 def process_order(request):
     try:
         address = request.data.get('address')
-        # first_name = request.data.get('first_name')
-        # last_name = request.data.get('last_name')
-        # address_1 = request.data.get('address_1')
-        # address_2 = request.data.get('address_2')
-        # city = request.data.get('city')
-        # state = request.data.get('state')
-        # zipcode = request.data.get('zipcode')
-        # country = request.data.get('country')
-        # phone_number = request.data.get('phone_number')
         shipping_method = request.data.get('shipping_method')
         order_total = request.data.get('order_total')
         coupon_code = request.data.get('coupon')
         print(order_total)
-        dis = check_coupon(coupon_code, request.user)
+        if len(coupon_code) > 1:
+            dis = check_coupon(coupon_code, request.user)
+        else:
+            dis = 0
         transaction_id = datetime.datetime.now().timestamp()
         try:
-            order = Order.objects.get(customer=request.user, ordered=False)
+            order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
             final_bill = order.get_order_total * (100- dis) / 100
             print(final_bill)
             if str(order_total) == str(final_bill):

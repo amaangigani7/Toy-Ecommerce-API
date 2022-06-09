@@ -3,6 +3,11 @@ from rest_framework.response import Response
 from .models import *
 import uuid
 
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = '__all__'
+
 class MakerClassReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = MakerClassReview
@@ -65,7 +70,7 @@ class ProductSerializer(serializers.ModelSerializer):
     get_reviews = ProductReviewSerializer(many=True)
     get_product_rating = serializers.FloatField()
     get_similar_products = SimilarProductSerializer(many=True)
-    
+
     class Meta:
         model = Product
         fields = '__all__'
@@ -119,7 +124,7 @@ class WishListSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = '__all__'
+        fields = ('id', 'order', 'product_name', 'quantity', 'date_added')
 
 
 class ShippingAddressSerializer(serializers.ModelSerializer):
