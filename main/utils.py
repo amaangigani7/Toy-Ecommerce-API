@@ -73,12 +73,14 @@ def send_email_to_all_subscribers(title, message):
 
 def check_coupon(coupon, user):
     dis = 0
-    from .models import Coupon
+    # from .models import Coupon
     c = Coupon.objects.filter(is_active=True)
-    for i in c:
-        if i.name == coupon and (i.customer == user or i.customer == None):
-            dis = i.discount
-            break
+    orders = Order.objects.filter(customer=user, coupon_used__name=coupon)
+    if len(orders) == 0:
+        for i in c:
+            if i.name == coupon and (i.customer == user or i.customer == None):
+                dis = i.discount
+                break
     return dis
 
 # order, created = Order.objects.get_or_create(customer__user_name='amaan35', complete=False)

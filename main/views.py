@@ -196,7 +196,7 @@ def cart_checkout(request):
         return Response({'msg': msg})
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def verify_coupon(request):
     coupon = request.data.get('coupon')
@@ -210,7 +210,8 @@ def verify_coupon(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def customer_coupons(request):
-    coupons = Coupon.objects.filter(customer=request.user)
+
+    coupons = Coupon.objects.filter(Q(customer=request.user) | Q(customer=None))
     if len(coupons) > 0:
         serializer = CouponSerializer(coupons, many=True)
         return Response({'coupons': serializer.data})
@@ -252,6 +253,7 @@ def process_order(request):
                 payment = client.order.create(data=DATA)
                 print(payment)
                 order.ordered = True
+                order.coupon_used = Coupon.objects.get(name=coupon_code)
                 order.save()
                 send_email_after_purchase(order)
                 msg = 'order placed!'

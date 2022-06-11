@@ -247,6 +247,15 @@ class WishList(models.Model):
     def __str__(self):
         return "{} - {}".format(self.customer.user_name, self.product.name)
 
+class Coupon(models.Model):
+    name = models.CharField(max_length=10)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    discount = models.IntegerField(validators=[MinValueValidator(1),
+                                       MaxValueValidator(100)])
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
 
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, null=True, blank=True, on_delete=models.SET_NULL)
@@ -286,6 +295,7 @@ class Order(models.Model):
     delivered = models.BooleanField(default=False, choices=delivered_choices)
     shipping_method = models.CharField(null=True, blank=True, max_length=255)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    coupon_used = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         unique_together = [['customer', 'transaction_id']]
@@ -343,16 +353,6 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return self.product.name
-
-class Coupon(models.Model):
-    name = models.CharField(max_length=10)
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-    discount = models.IntegerField(validators=[MinValueValidator(1),
-                                       MaxValueValidator(100)])
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
 
 class Subscriber(models.Model):
     email = models.EmailField(null=True)
