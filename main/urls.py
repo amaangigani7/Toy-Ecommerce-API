@@ -17,6 +17,7 @@ urlpatterns = [
     # path('token', views.token_send, name='token_send'),
     # path('success/', views.success, name='success'),
     path('verify/<auth_token>/', views.verify , name="verify"),
+    path('user_details/', views.user_details , name='user_details'),
     # path('error' , views.error_page, name="error"),
     path('forgot_password/' , views.forgot_password , name="forgot_password"),
     path('change_password/<token>/' , views.change_password , name="change_password"),

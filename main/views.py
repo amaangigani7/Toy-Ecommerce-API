@@ -37,6 +37,12 @@ def home(request):
     return render(request, 'main/home.html')
 
 @api_view(['GET'])
+def user_details(request):
+    user_details = Customer.objects.get(email=request.user.email)
+    serializer = CustomerSerializer(user_details)
+    return Response({'user_details': serializer.data})
+
+@api_view(['GET'])
 def special_products(request):
     sp = SpecialProduct.objects.all()
     serializer = SpecialProductSerializer(sp, many=True)
