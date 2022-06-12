@@ -343,13 +343,15 @@ class OrderItem(models.Model):
     def product_slug(self):
         return self.product.slug
 
+    def stock(self):
+        return self.product.in_stock
+
     def image_link(self):
         img = ProductImage.objects.filter(product=self.product)
         return img[0].image_link
 
     def item_status(self):
         return self.order.ordered, self.order.shipped, self.order.out_for_delivery, self.order.arriving_today
-
 
     def change_address(self, new_add):
         return new_add

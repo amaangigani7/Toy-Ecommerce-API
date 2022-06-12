@@ -125,7 +125,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ('id', 'order', 'image_link', 'product_name', 'quantity', 'product_slug',
-                    'get_total', 'placed_on', 'item_status', 'returned', 'refunded')
+                'stock', 'get_total', 'placed_on', 'item_status', 'returned', 'refunded')
 
 
 class ShippingAddressSerializer(serializers.ModelSerializer):
