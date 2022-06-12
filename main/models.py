@@ -340,6 +340,9 @@ class OrderItem(models.Model):
     def product_name(self):
         return self.product.name
 
+    def product_slug(self):
+        return self.product.slug
+
     def image_link(self):
         img = ProductImage.objects.filter(product=self.product)
         return img[0].image_link

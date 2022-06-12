@@ -124,7 +124,7 @@ class WishListSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ('id', 'order', 'image_link', 'product_name', 'quantity',
+        fields = ('id', 'order', 'image_link', 'product_name', 'quantity', 'product_slug',
                     'get_total', 'placed_on', 'item_status', 'returned', 'refunded')
 
 
