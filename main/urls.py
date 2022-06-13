@@ -6,19 +6,8 @@ from django.conf import settings
 app_name = 'main'
 
 urlpatterns = [
-    # path('login/', views.login_attempt, name='login_attempt'),
-    # path('login/', views.LoginAPI.as_view(), name='login'),
-    # path('logout/', views.user_logout, name='logout'),
-    # path('register/', views.RegisterAPI.as_view(), name='register'),
-    # path('register/', views.register_attempt, name='register_attempt'),
-    # path('register/', views.register, name='register'),
-    # path('login/', views.user_login, name='login'),
-    # path('logout/', views.user_logout, name='logout'),
-    # path('token', views.token_send, name='token_send'),
-    # path('success/', views.success, name='success'),
     path('verify/<auth_token>/', views.verify , name="verify"),
     path('user_details/', views.user_details , name='user_details'),
-    # path('error' , views.error_page, name="error"),
     path('forgot_password/' , views.forgot_password , name="forgot_password"),
     path('change_password/<token>/' , views.change_password , name="change_password"),
     path('your_account/', views.your_account, name='your_account'),
@@ -30,6 +19,8 @@ urlpatterns = [
     path('gifts/<slug:slug>/', views.gift_detail, name='gift_detail'),
     path('blogs/', views.blogs, name='blogs'),
     path('contact_us/request/', views.contact_us_receive, name='contact_us_receive'),
+    path('contact_us/gift/', views.gift_contact_us_receive, name='gift_contact_us_receive'),
+    path('contact_us/product/', views.product_contact_us_receive, name='product_contact_us_receive'),
     path('blogs/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('products/review/<slug:slug>/', views.product_review, name='product_review'),
     path('products/review/edit/<slug:slug>/', views.product_review_edit, name='product_review_edit'),
@@ -43,7 +34,6 @@ urlpatterns = [
     path('verify_coupon/', views.verify_coupon, name='verify_coupon'),
     path('customer_coupons/', views.customer_coupons, name='customer_coupons'),
     path('return_order/', views.return_order, name='return_order'),
-    # path('buy_now/<slug:slug>/', views.buy_now, name='buy_now'),
     path('process_order/', views.process_order, name='process_order'),
     path('all_addresses/', views.all_addresses, name='all_addresses'),
     path('change_default_address/', views.change_default_address, name='change_default_address'),
@@ -53,8 +43,5 @@ urlpatterns = [
     path('unsubscribe/', views.unsubscribe, name='unsubscribe'),
     path('global_reviews/', views.global_reviews, name='global_reviews'),
     path('maker_class_reviews/', views.maker_class_reviews, name='maker_class_reviews'),
-    # path('about/', views.about, name='about'),
-    # path('contact_us/', views.contact_us, name='contact_us'),
-    # path('faqs_and_blogs/', views.faqs, name='faqs_and_blogs'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

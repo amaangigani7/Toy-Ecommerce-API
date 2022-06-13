@@ -90,3 +90,14 @@ class ContactUsAdminConfig(admin.ModelAdmin):
     list_display = ['name', 'email', 'phone', 'message']
 
 admin.site.register(ContactUs, ContactUsAdminConfig)
+
+class GiftContactUsAdminConfig(admin.ModelAdmin):
+    list_display = ['gift', 'quantity', 'name', 'email', 'phone', 'message']
+
+admin.site.register(GiftContactUs, GiftContactUsAdminConfig)
+
+
+class ProductContactUsAdminConfig(admin.ModelAdmin):
+    list_display = ['product', 'quantity', 'name', 'email', 'phone', 'message']
+
+admin.site.register(ProductContactUs, ProductContactUsAdminConfig)

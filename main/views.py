@@ -130,6 +130,38 @@ def contact_us_receive(request):
     return Response({'msg': msg, 'request': serializer.data})
 
 @api_view(['POST'])
+def gift_contact_us_receive(request):
+    slug = request.data.get('slug')
+    quantity = request.data.get('quantity')
+    name = request.data.get('name')
+    email = request.data.get('email')
+    phone = request.data.get('phone')
+    message = request.data.get('message')
+    # try:
+    cu = GiftContactUs.objects.create(gift=Gift.objects.get(slug=slug),
+                                    quantity=quantity, name=name, email=email,
+                                    phone=phone, message=message)
+    msg = "Request has been sent"
+    serializer = GiftContactUsSerializer(cu)
+    return Response({'msg': msg, 'gifts_request': serializer.data})
+
+@api_view(['POST'])
+def product_contact_us_receive(request):
+    slug = request.data.get('slug')
+    quantity = request.data.get('quantity')
+    name = request.data.get('name')
+    email = request.data.get('email')
+    phone = request.data.get('phone')
+    message = request.data.get('message')
+    # try:
+    cu = ProductContactUs.objects.create(product=Product.objects.get(slug=slug),
+                                    quantity=quantity, name=name, email=email,
+                                    phone=phone, message=message)
+    msg = "Request has been sent"
+    serializer = ProductContactUsSerializer(cu)
+    return Response({'msg': msg, 'products_request': serializer.data})
+
+@api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def product_review(request, slug):
     product = Product.objects.get(slug=slug)
@@ -356,6 +388,7 @@ def change_default_address(request):
             msg = 'both adds are same'
         else:
             msg = 'new address made default'
+
     else:
         msg = 'making new address'
     if len(curr_add) > 0:
@@ -364,9 +397,12 @@ def change_default_address(request):
             i.save()
     new_add.default_add = True
     new_add.save()
+    all_addresses = ShippingAddress.objects.filter(customer=request.user)
+    serializer = ShippingAddressSerializer(all_addresses, many=True)
     # curr_add = ShippingAddress.objects.filter(customer=request.user, default_add=True)
     # serializer = ShippingAddressSerializer(curr_add, many=True)
-    return Response({'msg': msg, "new_address": ShippingAddressSerializer(new_add).data})
+    return Response({'msg': msg, "new_address": ShippingAddressSerializer(new_add).data,
+                    "all_addresses": serializer.data})
 
 
 @api_view(['POST'])
@@ -415,10 +451,6 @@ def add_to_cart(request, slug):
     # return Response({'cart_item': cart_item_serializer.data, 'full_cart': cart_serializer.data})
     # return Response({'message': 'product found.'})
 
-    # products = Product.objects.all()
-    # msg = 'Item has been added to cart'
-    # data = list(json.dumps(msg)) + list(serializers.serialize('json', products))
-    # return HttpResponse(data, content_type="application/json")
 
 
 @api_view(['POST'])
@@ -492,10 +524,6 @@ def quantity_change_cart(request):
         else:
             c.save()
     cart = CartItem.objects.filter(customer=request.user)
-    # img_lis = ProductImage.objects.filter(product=product)
-    # serializer = ProductSerializer(product)
-    # img_serializer = ProductImageSerializer(img_lis, many=True)
-    # cart_item_serializer = CartItemSerializer(c)
     msg = "{} quantity changed to {}".format(c.product.name, c.quantity)
     cart_serializer = CartItemSerializer(cart, many=True)
     return Response({'msg': msg, 'full_cart': cart_serializer.data})
@@ -522,31 +550,14 @@ def return_order(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def your_account(request):
-    # print(request.user)
-    # cart_items = CartItem.objects.filter(customer=request.user)
     wish_list = WishList.objects.filter(customer=request.user)
     past_orders = OrderItem.objects.filter(order__customer=request.user, order__delivered=True, returned=False)
     upcoming_orders = OrderItem.objects.filter(order__customer=request.user, order__delivered=False, returned=False)
     returned_orders = OrderItem.objects.filter(order__customer=request.user, returned=True)
-    # print(cart_items)
-    # print(orders)
-    # product = Product.objects.get(slug=slug)
-    # img_lis = ProductImage.objects.filter(product=product)
-    # serializer = CartItemSerializer(cart_items, many=True)
     serializer = WishListSerializer(wish_list, many=True)
-    # cart_return = serializer.data
-    # if len(orders) > 0:
     p_serializer = OrderItemSerializer(past_orders, many=True)
     u_serializer = OrderItemSerializer(upcoming_orders, many=True)
     r_serializer = OrderItemSerializer(returned_orders, many=True)
-    # orders_return = o_serializer.data
-    # print(serializer)
-    # o_serializer = OrderSerializer(orders)
-    # print(o_serializer)
-    # print(serializer.data)
-    # img_serializer = ProductImageSerializer(img_lis, many=True)
-    # return Response({'cart_items': serializer.data})
-    # 'order_details': o_serializer.data, 'cart_items': serializer.data
     return Response({
         'message': "this is your account - {}".format(request.user),
         'past_orders': p_serializer.data,
@@ -554,20 +565,6 @@ def your_account(request):
         'returned_orders': r_serializer.data,
         'wish_list': serializer.data
         })
-    # all_objects = list(orders) + list(cart_items)
-    # data = serializers.serialize('json', all_objects)
-    # return HttpResponse(data)
-    # return render(request, 'main/your_account.html', {'customer': request.user, 'cart_items': cart_items, 'orders': orders})
-
-# def about(request):
-#     return render(request, 'main/about.html')
-#
-# def faqs(request):
-#     return render(request, 'main/faqs_and_blogs.html')
-#
-# def contact_us(request):
-#     return render(request, 'main/contact_us.html')
-
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -586,37 +583,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-# class LoginAPI(TokenObtainPairView):
-#     permission_classes = (permissions.AllowAny,)
-#
-#     def post(self, request, format=None):
-#         # serializer = AuthTokenSerializer(data=request.data)
-#         # serializer.is_valid(raise_exception=True)
-#         # parameter = serializer.validated_data['username']
-#         # password = serializer.validated_data['password']
-#         # print(parameter, password)
-#         parameter = request.data['email']
-#         password = request.data['password']
-#         print(parameter, password)
-#         if parameter is None:
-#             return Response({"message": 'User not found / Incorrect password'})
-#         elif password is None:
-#             return Response({"message": 'User not found / Incorrect password'})
-#         try:
-#             customer = Customer.objects.get(email=parameter)
-#         except:
-#             customer = Customer.objects.get(user_name=parameter)
-#         print('customer active: ', customer.is_active)
-#         if not customer.is_active:
-#             return Response({"message": 'Profile is not verified check your mail.'})
-#         print(password, customer.check_password(password))
-#         if customer.check_password(password):
-#             login(request, customer)
-#         else:
-#             return Response({"message": 'User not found / Incorrect password.'})
-#         return super(LoginAPI, self).post(request, format=None)
-#
-
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
@@ -628,9 +594,7 @@ class RegisterAPI(generics.GenericAPIView):
         if Customer.objects.filter(user_name=request.data['email']):
             return Response({"message": 'Email already registered! Try logging in!'})
         serializer = self.get_serializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            # serializer.save()
             customer = serializer.save()
             send_email_after_registration(request.data['email'], token=Customer.objects.get(user_name=request.data['user_name']).verification_token)
             return Response({
@@ -640,13 +604,6 @@ class RegisterAPI(generics.GenericAPIView):
             })
         return Response({"Errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-
-# def success(request):
-#     return render(request , 'main/success.html')
-
-
-# def token_send(request):
-#     return render(request , 'main/token_send.html')
 
 @api_view(['GET'])
 def verify(request, auth_token):
@@ -659,6 +616,7 @@ def verify(request, auth_token):
             customer.is_active = True
             customer.verification_token = None
             customer.save()
+            # return HttpResponse(f"<script>location.replace('https://amazon.in/');</script>")
             return Response({'message': "Your account has now been verified."})
         else:
             return Response({'message': "Could not verify your registration."})
@@ -667,10 +625,10 @@ def verify(request, auth_token):
 
 
 
-# @login_required
-# def user_logout(request):
-#     logout(request)
-#     return render(request,'main/home.html')
+@api_view(['POST'])
+def user_logout(request):
+    logout(request)
+    return Response({'message': 'Logout successfull'})
 
 @api_view(['POST'])
 def change_password(request, token):

@@ -221,6 +221,33 @@ class ContactUs(models.Model):
         verbose_name_plural = 'Contact Us'
         ordering = ['-sent_on']
 
+class GiftContactUs(models.Model):
+    gift = models.ForeignKey(Gift, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.IntegerField(default=1)
+    name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=200)
+    phone = PhoneNumberField()
+    message = models.TextField(unique=True)
+    sent_on = models.DateTimeField(auto_now_add=True, null=True)
+
+    class Meta:
+        verbose_name_plural = 'Gift Contact Us'
+        ordering = ['-sent_on']
+
+class ProductContactUs(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.IntegerField(default=1)
+    name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=200)
+    phone = PhoneNumberField()
+    message = models.TextField(null=True, unique=True)
+    sent_on = models.DateTimeField(auto_now_add=True, null=True)
+
+    class Meta:
+        verbose_name_plural = 'Product Contact Us'
+        ordering = ['-sent_on']
+        # unique_together = ('product', 'quantity', 'name', 'email', 'phone', 'message')
+
 
 class CartItem(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)

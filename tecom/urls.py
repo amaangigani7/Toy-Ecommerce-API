@@ -12,5 +12,7 @@ urlpatterns = [
     path('auth/register/', views.RegisterAPI.as_view(), name='register'),
     path('auth/login/', views.MyTokenObtainPairView.as_view(), name='login'),
     path('auth/refresh-token/', TokenRefreshView.as_view(), name='refreshtoken'),
+    # path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='logoutall'),
+    # path('auth/logout/', views.user_logout, name='user_logout'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

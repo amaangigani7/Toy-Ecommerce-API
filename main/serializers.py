@@ -37,6 +37,18 @@ class ContactUsSerializer(serializers.ModelSerializer):
         model = ContactUs
         fields = '__all__'
 
+class GiftContactUsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GiftContactUs
+        fields = '__all__'
+
+class ProductContactUsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductContactUs
+        fields = '__all__'
+
 class ProductReviewSerializer(serializers.ModelSerializer):
     # customer = CustomerSerializer()
 
