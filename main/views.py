@@ -214,34 +214,7 @@ def account_edit(request):
     return Response({"msg": msg, 'new_data': CustomerSerializer(customer).data})
 
 # @login_required
-@api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
-def cart_checkout(request):
-    order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
-    order.save()
-    cart_items = CartItem.objects.filter(customer=request.user)
-    if len(cart_items) > 0:
-        for i in cart_items:
-            order_item, created = OrderItem.objects.get_or_create(order=order, product=i.product)
-            cart_quan = CartItem.objects.get(customer=request.user, product=i.product)
-            order_item.quantity = cart_quan.quantity
-            order_item.save()
-        total = order.get_order_total
-        serializer = OrderSerializer(order)
-        client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
-        DATA = {
-            # "amount": int(str(order.get_order_total)[:-3]),
-            "amount": int(total)*100,
-            "currency": "INR",
-            'payment_capture': '1'
-        }
-        payment = client.order.create(data=DATA)
-        print(payment)
-        return Response({"order_details": serializer.data, 'total': total, 'total_paise': int(total*100),
-                            'payment': payment})
-    else:
-        msg = "The Cart is Empty"
-        return Response({'msg': msg})
+
 
 
 @api_view(['GET'])
@@ -269,6 +242,48 @@ def customer_coupons(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+def cart_checkout(request):
+    coupon_code = request.data.get('coupon')
+    front_total = request.data.get('total')
+    order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
+    order.save()
+    cart_items = CartItem.objects.filter(customer=request.user)
+    if len(cart_items) > 0:
+        for i in cart_items:
+            order_item, created = OrderItem.objects.get_or_create(order=order, product=i.product)
+            cart_quan = CartItem.objects.get(customer=request.user, product=i.product)
+            order_item.quantity = cart_quan.quantity
+            order_item.save()
+        total = order.get_order_total
+        serializer = OrderSerializer(order)
+        order.coupon_used = Coupon.objects.get(name=coupon_code)
+        order.save()
+        if len(coupon_code) > 1:
+            dis = check_coupon(coupon_code, request.user)
+        else:
+            dis = 0
+        final_bill = total * (100 - dis) / 100
+        print(final_bill)
+        if str(front_total) == str(final_bill):
+            client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
+            DATA = {
+                "amount": int(final_bill)*100,
+                "currency": "INR",
+                'payment_capture': '1'
+            }
+            payment = client.order.create(data=DATA)
+            print(payment)
+            return Response({"order_details": serializer.data, 'total': final_bill, 'total_paise': int(final_bill*100),
+                                'payment': payment})
+        else:
+            return Response({'msg': "given total and cart total are different"})
+    else:
+        msg = "The Cart is Empty"
+        return Response({'msg': msg})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
 def process_order(request):
     try:
         payment_id = request.data.get('payment_id')
@@ -277,24 +292,25 @@ def process_order(request):
         address = request.data.get('address')
         shipping_method = request.data.get('shipping_method')
         order_total = request.data.get('order_total')
-        coupon_code = request.data.get('coupon')
-        print(order_total)
-        if len(coupon_code) > 1:
-            dis = check_coupon(coupon_code, request.user)
-        else:
-            dis = 0
+        # coupon_code = request.data.get('coupon')
+        # print(order_total)
+        # if len(coupon_code) > 1:
+        #     dis = check_coupon(coupon_code, request.user)
+        # else:
+        #     dis = 0
         # transaction_id = datetime.datetime.now().timestamp()
         try:
+            # breakpoint()
             order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
-            final_bill = order.get_order_total * (100- dis) / 100
-            print(final_bill)
-            if str(order_total) == str(final_bill):
-                shipping_add, created = get_create_address(address, request.user)
-                shipping_add.save()
-                order.shipping_address = shipping_add
-                order.payment_id = payment_id
-                order.order_id = order_id
-                order.signature = signature
+            # final_bill = order.get_order_total * (100- dis) / 100
+            # print(final_bill)
+            # if str(order_total) == str(final_bill):
+            shipping_add, created = get_create_address(address, request.user)
+            shipping_add.save()
+            order.shipping_address = shipping_add
+            order.payment_id = payment_id
+            order.order_id = order_id
+            order.signature = signature
                 # client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
                 # DATA = {
                 #     # "amount": int(str(order.get_order_total)[:-3]),
@@ -304,19 +320,19 @@ def process_order(request):
                 # }
                 # payment = client.order.create(data=DATA)
                 # print(payment)
-                order.ordered = True
-                order.coupon_used = Coupon.objects.get(name=coupon_code)
-                order.save()
-                send_email_after_purchase(order)
-                msg = 'order placed!'
-                cart_items = CartItem.objects.filter(customer=request.user)
-                for i in cart_items:
-                    i.delete()
-                serializer = OrderSerializer(order)
-                return Response({'msg': msg, 'order_details': serializer.data})
-            else:
-                msg = "There was some error with provided total and actual total"
-                return Response({'msg': msg})
+            order.ordered = True
+            order.coupon_used = Coupon.objects.get(name=coupon_code)
+            order.save()
+            send_email_after_purchase(order)
+            msg = 'order placed!'
+            cart_items = CartItem.objects.filter(customer=request.user)
+            for i in cart_items:
+                i.delete()
+            serializer = OrderSerializer(order)
+            return Response({'msg': msg, 'order_details': serializer.data})
+            # else:
+            #     msg = "There was some error with provided total and actual total"
+            #     return Response({'msg': msg})
         except:
             return Response({'msg': "Order is not created yet."})
     except ObjectDoesNotExist as e:
