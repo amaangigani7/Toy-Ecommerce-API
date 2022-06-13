@@ -315,7 +315,9 @@ class Order(models.Model):
 
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     date_ordered = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    transaction_id = models.CharField(null=True, blank=True, max_length=255)
+    payment_id = models.CharField(null=True, blank=True, max_length=255)
+    order_id = models.CharField(null=True, blank=True, max_length=255)
+    signature = models.TextField(null=True, blank=True)
     ordered = models.BooleanField(default=False)
     shipped = models.BooleanField(default=False)
     out_for_delivery = models.BooleanField(default=False)
@@ -325,9 +327,10 @@ class Order(models.Model):
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
     coupon_used = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
 
+
     class Meta:
-        unique_together = [['customer', 'transaction_id']]
-        ordering = ['-transaction_id', '-id']
+        unique_together = [['customer', 'payment_id']]
+        ordering = ['-id']
 
     @property
     def get_order_total(self):

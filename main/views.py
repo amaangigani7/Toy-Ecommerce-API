@@ -258,7 +258,6 @@ def verify_coupon(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def customer_coupons(request):
-
     coupons = Coupon.objects.filter(Q(customer=request.user) | Q(customer=None))
     if len(coupons) > 0:
         serializer = CouponSerializer(coupons, many=True)
@@ -272,6 +271,9 @@ def customer_coupons(request):
 @permission_classes([permissions.IsAuthenticated])
 def process_order(request):
     try:
+        payment_id = request.data.get('payment_id')
+        order_id = request.data.get('order_id')
+        signature = request.data.get('signature')
         address = request.data.get('address')
         shipping_method = request.data.get('shipping_method')
         order_total = request.data.get('order_total')
@@ -281,7 +283,7 @@ def process_order(request):
             dis = check_coupon(coupon_code, request.user)
         else:
             dis = 0
-        transaction_id = datetime.datetime.now().timestamp()
+        # transaction_id = datetime.datetime.now().timestamp()
         try:
             order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
             final_bill = order.get_order_total * (100- dis) / 100
@@ -290,7 +292,9 @@ def process_order(request):
                 shipping_add, created = get_create_address(address, request.user)
                 shipping_add.save()
                 order.shipping_address = shipping_add
-                order.transaction_id = transaction_id
+                order.payment_id = payment_id
+                order.order_id = order_id
+                order.signature = signature
                 # client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
                 # DATA = {
                 #     # "amount": int(str(order.get_order_total)[:-3]),

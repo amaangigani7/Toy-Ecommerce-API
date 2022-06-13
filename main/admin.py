@@ -50,7 +50,7 @@ class CartItemAdminConfig(admin.ModelAdmin):
 admin.site.register(CartItem, CartItemAdminConfig)
 
 class OrderAdminConfig(admin.ModelAdmin):
-    list_display = ['customer', 'transaction_id', 'ordered', "shipped", "out_for_delivery", "arriving_today", 'delivered', 'shipping_method', "shipping_address"]
+    list_display = ['customer', 'payment_id', 'ordered', "shipped", "out_for_delivery", "arriving_today", 'delivered', 'shipping_method', "shipping_address"]
 
     def has_change_permission(self, request, *args, **kwargs):
         if request.user.is_staff:
