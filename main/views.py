@@ -256,12 +256,12 @@ def cart_checkout(request):
             order_item.save()
         total = order.get_order_total
         serializer = OrderSerializer(order)
-        order.coupon_used = Coupon.objects.get(name=coupon_code)
-        order.save()
         if len(coupon_code) > 1:
             dis = check_coupon(coupon_code, request.user)
+            order.coupon_used = Coupon.objects.get(name=coupon_code)
         else:
             dis = 0
+        order.save()
         final_bill = total * (100 - dis) / 100
         print(final_bill)
         if str(front_total) == str(final_bill):
@@ -278,8 +278,7 @@ def cart_checkout(request):
         else:
             return Response({'msg': "given total and cart total are different"})
     else:
-        msg = "The Cart is Empty"
-        return Response({'msg': msg})
+        return Response({'msg': "The Cart is Empty"})
 
 
 @api_view(['POST'])
@@ -291,7 +290,7 @@ def process_order(request):
         signature = request.data.get('signature')
         address = request.data.get('address')
         shipping_method = request.data.get('shipping_method')
-        order_total = request.data.get('order_total')
+        # order_total = request.data.get('order_total')
         # coupon_code = request.data.get('coupon')
         # print(order_total)
         # if len(coupon_code) > 1:
@@ -300,6 +299,7 @@ def process_order(request):
         #     dis = 0
         # transaction_id = datetime.datetime.now().timestamp()
         try:
+            # breakpoint()
             # breakpoint()
             order, created = Order.objects.get_or_create(customer=request.user, ordered=False)
             # final_bill = order.get_order_total * (100- dis) / 100
@@ -321,7 +321,7 @@ def process_order(request):
                 # payment = client.order.create(data=DATA)
                 # print(payment)
             order.ordered = True
-            order.coupon_used = Coupon.objects.get(name=coupon_code)
+            # order.coupon_used = Coupon.objects.get(name=coupon_code)
             order.save()
             send_email_after_purchase(order)
             msg = 'order placed!'
