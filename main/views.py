@@ -228,7 +228,17 @@ def cart_checkout(request):
             order_item.save()
         total = order.get_order_total
         serializer = OrderSerializer(order)
-        return Response({"order_details": serializer.data, 'total': total, 'total_paise': int(total*100)})
+        client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
+        DATA = {
+            # "amount": int(str(order.get_order_total)[:-3]),
+            "amount": int(total),
+            "currency": "INR",
+            'payment_capture': '1'
+        }
+        payment = client.order.create(data=DATA)
+        print(payment)
+        return Response({"order_details": serializer.data, 'total': total, 'total_paise': int(total*100),
+        'payment': payment})
     else:
         msg = "The Cart is Empty"
         return Response({'msg': msg})
@@ -281,15 +291,15 @@ def process_order(request):
                 shipping_add.save()
                 order.shipping_address = shipping_add
                 order.transaction_id = transaction_id
-                client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
-                DATA = {
-                    # "amount": int(str(order.get_order_total)[:-3]),
-                    "amount": int(final_bill),
-                    "currency": "INR",
-                    'payment_capture': '1'
-                }
-                payment = client.order.create(data=DATA)
-                print(payment)
+                # client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
+                # DATA = {
+                #     # "amount": int(str(order.get_order_total)[:-3]),
+                #     "amount": int(final_bill),
+                #     "currency": "INR",
+                #     'payment_capture': '1'
+                # }
+                # payment = client.order.create(data=DATA)
+                # print(payment)
                 order.ordered = True
                 order.coupon_used = Coupon.objects.get(name=coupon_code)
                 order.save()
