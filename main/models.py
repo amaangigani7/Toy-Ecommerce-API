@@ -227,7 +227,7 @@ class GiftContactUs(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField(max_length=200)
     phone = PhoneNumberField()
-    message = models.TextField(unique=True)
+    message = models.TextField()
     sent_on = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
@@ -240,7 +240,7 @@ class ProductContactUs(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField(max_length=200)
     phone = PhoneNumberField()
-    message = models.TextField(null=True, unique=True)
+    message = models.TextField(null=True)
     sent_on = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
