@@ -259,20 +259,21 @@ class Coupon(models.Model):
 
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, null=True, blank=True, on_delete=models.SET_NULL)
-    first_name = models.CharField(null=True, max_length=100)
-    last_name = models.CharField(null=True, max_length=100)
+    # first_name = models.CharField(null=True, max_length=100, blank=True)
+    # last_name = models.CharField(null=True, max_length=100)
     address_1 = models.CharField(null=True, max_length=255)
     address_2 = models.CharField(null=True, blank=True, max_length=255)
     city = models.CharField(null=True, max_length=255)
     state = models.CharField(null=True, max_length=10)
     zipcode = models.CharField(null=True, max_length=100)
     country = models.CharField(null=True, max_length=50)
-    phone_number = PhoneNumberField(null=True, )
+    # phone_number = PhoneNumberField(null=True, )
     date_added = models.DateTimeField(auto_now_add=True)
     default_add = models.BooleanField(null=True, blank=True, default=False)
 
     class Meta:
-        unique_together = ('customer', 'first_name', 'last_name', 'address_1', 'address_1', 'city', 'state', 'zipcode', 'country', 'phone_number')
+        unique_together = ('customer', 'address_1', 'address_1')
+        # unique_together = ('customer', 'address_1', 'address_1', 'city', 'state', 'zipcode', 'country')
 
 
     def __str__(self):
@@ -326,6 +327,7 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(null=True, blank=True, default=0)
     placed_on = models.DateTimeField(auto_now_add=True)
     returned = models.BooleanField(default=False)
+    returned_reason = models.TextField(null=True, blank=True)
     refunded = models.BooleanField(default=False)
 
     class Meta:

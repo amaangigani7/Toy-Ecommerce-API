@@ -11,30 +11,28 @@ def get_create_address(address, user, parameter="both"):
     if parameter == 'both':
         new_add, created = ShippingAddress.objects.get_or_create(
             customer = user,
-            first_name = address['first_name'],
-            last_name = address['last_name'],
             address_1 = address['address_1'],
             address_2 = address['address_2'],
             city = address['city'],
             state = address['state'],
             zipcode = address['zipcode'],
             country = address['country'],
-            phone_number = address['phone_number']
+            # phone_number = address['phone_number']
         )
         return new_add, created
     elif parameter == 'get':
         try:
             new_add = ShippingAddress.objects.filter(
                 customer = user,
-                first_name = address['first_name'],
-                last_name = address['last_name'],
+                # first_name = address['first_name'],
+                # last_name = address['last_name'],
                 address_1 = address['address_1'],
                 address_2 = address['address_2'],
                 city = address['city'],
                 state = address['state'],
                 zipcode = address['zipcode'],
                 country = address['country'],
-                phone_number = address['phone_number']
+                # phone_number = address['phone_number']
             ).first()
         except:
             new_add = None

@@ -76,7 +76,7 @@ admin.site.register(OrderItem, OrderItemAdminConfig)
 
 
 class ShippingAddressAdminConfig(admin.ModelAdmin):
-    list_display = ['customer', 'phone_number', 'first_name', 'default_add']
+    list_display = ['customer', 'default_add']
 
 admin.site.register(ShippingAddress, ShippingAddressAdminConfig)
 admin.site.register(WishList)

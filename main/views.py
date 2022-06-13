@@ -325,7 +325,9 @@ def delete_address(request):
             return Response({'msg': msg})
         add.delete()
         msg = "found and deleted the address"
-        return Response({'msg': msg})
+        all_addresses = ShippingAddress.objects.filter(customer=request.user)
+        serializer = ShippingAddressSerializer(all_addresses, many=True)
+        return Response({'msg': msg, "all_addresses": serializer.data})
     except:
         return Response({'msg': "something went wrong"})
 
@@ -356,11 +358,12 @@ def change_default_address(request):
             msg = 'new address made default'
     else:
         msg = 'making new address'
+    if len(curr_add) > 0:
+        for i in curr_add:
+            i.default_add = False
+            i.save()
     new_add.default_add = True
     new_add.save()
-    if len(curr_add) == 1:
-        curr_add[0].default_add = False
-        curr_add[0].save()
     # curr_add = ShippingAddress.objects.filter(customer=request.user, default_add=True)
     # serializer = ShippingAddressSerializer(curr_add, many=True)
     return Response({'msg': msg, "new_address": ShippingAddressSerializer(new_add).data})
@@ -501,10 +504,12 @@ def quantity_change_cart(request):
 @permission_classes([permissions.IsAuthenticated])
 def return_order(request):
     pk = request.data.get('pk')
+    reason = request.data.get('reason')
     order_item = OrderItem.objects.get(pk=pk)
     if order_item:
         if request.user == order_item.order.customer:
             order_item.returned = True
+            order_item.returned_reason = reason
             order_item.save()
             msg = "Your order has been returned"
         else:
