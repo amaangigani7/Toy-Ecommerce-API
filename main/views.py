@@ -231,14 +231,14 @@ def cart_checkout(request):
         client = razorpay.Client(auth=("rzp_test_5Eo5eGr8zKCjKA", "5DwlU0Sb80HkKQVdYbG1ckyV"))
         DATA = {
             # "amount": int(str(order.get_order_total)[:-3]),
-            "amount": int(total),
+            "amount": int(total)*100,
             "currency": "INR",
             'payment_capture': '1'
         }
         payment = client.order.create(data=DATA)
         print(payment)
         return Response({"order_details": serializer.data, 'total': total, 'total_paise': int(total*100),
-        'payment': payment})
+                            'payment': payment})
     else:
         msg = "The Cart is Empty"
         return Response({'msg': msg})
