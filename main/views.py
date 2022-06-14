@@ -137,14 +137,14 @@ def contact_us_receive(request):
 
 @api_view(['POST'])
 def gift_contact_us_receive(request):
-    slug = request.data.get('slug')
+    gift_name = request.data.get('gift_name')
     quantity = request.data.get('quantity')
     name = request.data.get('name')
     email = request.data.get('email')
     phone = request.data.get('phone')
     message = request.data.get('message')
     # try:
-    cu = GiftContactUs.objects.create(gift=Gift.objects.get(slug=slug),
+    cu = GiftContactUs.objects.create(gift=Gift.objects.get(name=gift_name),
                                     quantity=quantity, name=name, email=email,
                                     phone=phone, message=message)
     msg = "Request has been sent"
@@ -153,14 +153,14 @@ def gift_contact_us_receive(request):
 
 @api_view(['POST'])
 def product_contact_us_receive(request):
-    slug = request.data.get('slug')
+    prod_name = request.data.get('prod_name')
     quantity = request.data.get('quantity')
     name = request.data.get('name')
     email = request.data.get('email')
     phone = request.data.get('phone')
     message = request.data.get('message')
     # try:
-    cu = ProductContactUs.objects.create(product=Product.objects.get(slug=slug),
+    cu = ProductContactUs.objects.create(product=Product.objects.get(name=prod_name),
                                     quantity=quantity, name=name, email=email,
                                     phone=phone, message=message)
     msg = "Request has been sent"
