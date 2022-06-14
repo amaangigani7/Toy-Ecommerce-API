@@ -223,7 +223,7 @@ def account_edit(request):
 
 
 
-@api_view(['GET'])
+@api_view(['POST', 'GET'])
 @permission_classes([permissions.IsAuthenticated])
 def verify_coupon(request):
     if request.user.is_authenticated == True:
@@ -236,6 +236,7 @@ def verify_coupon(request):
     else:
         msg = 'User is not authenticated!'
     return Response({'msg': msg})
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
