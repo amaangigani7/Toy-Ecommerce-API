@@ -38,9 +38,15 @@ def home(request):
 
 @api_view(['GET'])
 def user_details(request):
-    user_details = Customer.objects.get(email=request.user.email)
-    serializer = CustomerSerializer(user_details)
-    return Response({'user_details': serializer.data})
+    try:
+        if request.user.is_authenticated == True:
+            user_details = Customer.objects.get(email=request.user.email)
+            serializer = CustomerSerializer(user_details)
+            return Response({'user_details': serializer.data})
+        else:
+            return Response({'msg': "User not authenticated"})
+    except:
+        return Response({'msg': "something went wrong"})
 
 @api_view(['GET'])
 def special_products(request):
@@ -220,12 +226,15 @@ def account_edit(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def verify_coupon(request):
-    coupon = request.data.get('coupon')
-    discount = check_coupon(coupon, request.user)
-    if discount == 0:
-        msg = 'Coupon is not valid for you'
+    if request.user.is_authenticated == True:
+        coupon = request.data.get('coupon')
+        discount = check_coupon(coupon, request.user)
+        if discount == 0:
+            msg = 'Coupon is not valid for you'
+        else:
+            msg = '{}'.format(discount)
     else:
-        msg = '{}'.format(discount)
+        msg = 'User is not authenticated!'
     return Response({'msg': msg})
 
 @api_view(['GET'])
@@ -660,31 +669,55 @@ def user_logout(request):
     logout(request)
     return Response({'message': 'Logout successfull'})
 
-@api_view(['POST'])
+
+# @api_view(['POST'])
 def change_password(request, token):
     try:
+        # breakpoint()
         customer = Customer.objects.filter(forget_password_token=token).first()
         if request.method == 'POST':
-            new_password = request.data.get('new_password')
-            confirm_password = request.data.get('confirm_password')
-            parameter = request.data.get('username')
+            # breakpoint()
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            parameter = request.POST.get('username')
             if parameter is None:
-                return Response({'message': 'Username/Email not relevant!'})
+                messages.success(request, 'User id not relevant')
+                return render(request, 'main/change_password.html', {'token': token})
+                # return Response({'message': 'Username/Email not relevant!'})
             if new_password != confirm_password:
-                return Response({'message': 'New password does not match the confirm password field!'})
-            try:
+                messages.success(request, 'New password does not match the confirm password field!')
+                return render(request, 'main/change_password.html', {'token': token})
+                # return Response({'message': 'New password does not match the confirm password field!'})
+            check_len = False
+            check_num = False
+            for i in new_password:
+                if check_num == False:
+                    if i.isdigit():
+                        check_num = True
+            if len(new_password) >= 6:
+                check_len = True
+            if check_len == True and check_num == True:
                 try:
-                    customer = Customer.objects.get(user_name=parameter)
+                    try:
+                        customer = Customer.objects.get(user_name=parameter)
+                    except:
+                        customer = Customer.objects.get(email=parameter)
+                    customer.set_password(new_password)
+                    customer.forget_password_token = None
+                    customer.save()
+                    return render(request, 'main/home.html')
+                    # return Response({'message': 'Password has been changed!'})
                 except:
-                    customer = Customer.objects.get(email=parameter)
-                customer.set_password(new_password)
-                customer.forget_password_token = None
-                customer.save()
-                return Response({'message': 'Password has been changed!'})
-            except:
-                return Response({'message': 'Password could not be changed! Error in Username/Email!'})
+                    return render(request, 'main/change_password.html', {'customer_id': customer.id})
+                    # return Response({'message': 'Password could not be changed! Error in Username/Email!'})
+            else:
+                messages.success(request, 'Password should have minimun 6 characters and a number!')
+                return render(request, 'main/change_password.html', {'token': token})
+        else:
+            return render(request, 'main/change_password.html', {'customer_id': customer.id})
     except Exception as e:
-        return Response({'message': e})
+        return render(request, 'main/change_password.html')
+
 
 @api_view(['POST'])
 def forgot_password(request):
