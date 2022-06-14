@@ -223,7 +223,7 @@ class ContactUs(models.Model):
 
 class GiftContactUs(models.Model):
     gift = models.ForeignKey(Gift, on_delete=models.SET_NULL, null=True, blank=True)
-    quantity = models.IntegerField(default=1)
+    quantity = models.CharField(max_length=500)
     name = models.CharField(max_length=200)
     email = models.EmailField(max_length=200)
     phone = PhoneNumberField()
@@ -236,7 +236,7 @@ class GiftContactUs(models.Model):
 
 class ProductContactUs(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
-    quantity = models.IntegerField(default=1)
+    quantity = models.CharField(max_length=500)
     name = models.CharField(max_length=200)
     email = models.EmailField(max_length=200)
     phone = PhoneNumberField()
