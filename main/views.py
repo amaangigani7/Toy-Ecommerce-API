@@ -652,16 +652,16 @@ def verify(request, auth_token):
         customer = Customer.objects.filter(verification_token=auth_token).first()
         if customer:
             if customer.is_active:
-                return Response({'message': "Your account is already verified."})
+                return HttpResponse("Your account is already verified. Please go back to the original website and login"")
             customer.is_active = True
             customer.verification_token = None
             customer.save()
             # return HttpResponse(f"<script>location.replace('https://amazon.in/');</script>")
-            return Response({'message': "Your account has now been verified."})
+            return HttpResponse("Your account has now been verified. Please go back to the original website and login")
         else:
-            return Response({'message': "Could not verify your registration."})
+            return HttpResponse("Could not verify your registration.")
     except Exception as e:
-        return Response({'message': e})
+        return HttpResponse("Some error occurred. Please contact us from the main website.")
 
 
 
@@ -706,7 +706,8 @@ def change_password(request, token):
                     customer.set_password(new_password)
                     customer.forget_password_token = None
                     customer.save()
-                    return render(request, 'main/home.html')
+                    messages.success(request, 'Password has been changed. Please log in through main website and close this tab!')
+                    return render(request, 'main/change_password.html')
                     # return Response({'message': 'Password has been changed!'})
                 except:
                     return render(request, 'main/change_password.html', {'customer_id': customer.id})
@@ -716,8 +717,8 @@ def change_password(request, token):
                 return render(request, 'main/change_password.html', {'token': token})
         else:
             return render(request, 'main/change_password.html', {'customer_id': customer.id})
-    except Exception as e:
-        return render(request, 'main/change_password.html')
+    except:
+        return HttpResponse("Some error occurred. Please contact us from the main website.")
 
 
 @api_view(['POST'])

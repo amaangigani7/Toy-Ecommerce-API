@@ -346,7 +346,7 @@ class Order(models.Model):
 
     def __str__(self):
         if self.ordered == True:
-            return str(self.transaction_id)
+            return str(self.order_id)
         else:
             return str(self.id)
 

@@ -7,6 +7,8 @@ from .models import ShippingAddress
 import pandas as pd
 import os
 
+host = "https://srushtigosai123.pythonanywhere.com/"
+
 def get_create_address(address, user, parameter="both"):
     if parameter == 'both':
         new_add, created = ShippingAddress.objects.get_or_create(
@@ -40,22 +42,23 @@ def get_create_address(address, user, parameter="both"):
 
 
 def send_email_after_registration(email, token):
+    print(request.get_host())
     subject = 'Your email needs to be verified'
-    message = 'Hi paste the link to verify your account https://srushtigosai123.pythonanywhere.com/main/verify/{}'.format(token)
+    message = 'Hi paste the link to verify your account {}main/verify/{}'.format(host, token)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email,]
     send_mail(subject, message, email_from, recipient_list)
 
 def send_email_for_password_reset(email, token):
     subject = 'Reset your password here'
-    message = 'Hi, click on the link to reset your password https://srushtigosai123.pythonanywhere.com/main/change_password/{}'.format(token)
+    message = 'Hi, click on the link to reset your password {}main/change_password/{}'.format(host, token)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email,]
     send_mail(subject, message, email_from, recipient_list)
 
 def send_email_after_purchase(order):
     subject = 'Order Placed Successfully'
-    message = 'Hi, Your order has been placed for {} of amount {}'.format(order.get_order_items, order.get_order_total)
+    message = 'Hi, Your order has been placed for {} of amount {}. Your Order ID: {} and Payment ID: {}'.format(order.get_order_items, order.get_order_total, order.order_id, order.payment_id)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [order.customer.email,]
     send_mail(subject, message, email_from, recipient_list)
