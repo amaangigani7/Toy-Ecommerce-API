@@ -631,7 +631,7 @@ class RegisterAPI(generics.GenericAPIView):
             return Response({"message": 'Username cannot have a "."'})
         if Customer.objects.filter(user_name=request.data['user_name']):
             return Response({"message": 'Username taken!'})
-        if Customer.objects.filter(email=request.data['email']):
+        if Customer.objects.filter(user_name=request.data['email']):
             return Response({"message": 'Email already registered! Try logging in!'})
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
