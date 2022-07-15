@@ -42,7 +42,7 @@ def get_create_address(address, user, parameter="both"):
 
 
 def send_email_after_registration(email, token):
-    subject = 'Your email needs to be verified'
+    subject = 'Your email needs to be verified. Please click the link.'
     message = 'Hi paste the link to verify your account {}main/verify/{}'.format(host, token)
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email,]
