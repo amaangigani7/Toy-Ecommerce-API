@@ -631,7 +631,7 @@ class RegisterAPI(generics.GenericAPIView):
             return Response({"message": 'Username cannot have a "."'})
         if Customer.objects.filter(user_name=request.data['user_name']):
             return Response({"message": 'Username taken!'})
-        if Customer.objects.filter(user_name=request.data['email']):
+        if Customer.objects.filter(email=request.data['email']):
             return Response({"message": 'Email already registered! Try logging in!'})
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -652,7 +652,7 @@ def verify(request, auth_token):
         customer = Customer.objects.filter(verification_token=auth_token).first()
         if customer:
             if customer.is_active:
-                return HttpResponse("Your account is already verified. Please go back to the original website and login"")
+                return HttpResponse("Your account is already verified. Please go back to the original website and login")
             customer.is_active = True
             customer.verification_token = None
             customer.save()
@@ -674,10 +674,8 @@ def user_logout(request):
 # @api_view(['POST'])
 def change_password(request, token):
     try:
-        # breakpoint()
         customer = Customer.objects.filter(forget_password_token=token).first()
         if request.method == 'POST':
-            # breakpoint()
             new_password = request.POST.get('new_password')
             confirm_password = request.POST.get('confirm_password')
             parameter = request.POST.get('username')
@@ -691,13 +689,16 @@ def change_password(request, token):
                 # return Response({'message': 'New password does not match the confirm password field!'})
             check_len = False
             check_num = False
+            check_alpha = False
             for i in new_password:
                 if check_num == False:
                     if i.isdigit():
                         check_num = True
-            if len(new_password) >= 6:
+                    elif i.isalpha():
+                        check_alpha = True
+            if 16 >= len(new_password) >= 6:
                 check_len = True
-            if check_len == True and check_num == True:
+            if check_len == True and  check_num == True and check_alpha == True:
                 try:
                     try:
                         customer = Customer.objects.get(user_name=parameter)
@@ -735,11 +736,13 @@ def forgot_password(request):
                 customer = Customer.objects.get(email=parameter)
             while True:
                 token = str(uuid.uuid4())
+                print(Customer.objects.filter(forget_password_token=token))
                 if not Customer.objects.filter(forget_password_token=token).first():
                     break
             customer.forget_password_token = token
             customer.save()
-            send_email_for_password_reset(customer.email, customer.forget_password_token)
+            print(token)
+            # send_email_for_password_reset(customer.email, customer.forget_password_token)
             return Response({'message': "An email is sent to your email id"})
         except:
             return Response({'message': "No User found with this username or email"})
